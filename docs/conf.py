@@ -40,7 +40,8 @@ release = ''
 # ones.
 extensions = [
     'sphinx.ext.autosectionlabel',
-    'sphinxcontrib.bibtex'
+    'sphinxcontrib.bibtex',
+    'sphinx.ext.githubpages'
 ]
 
 bibtex_bibfiles = ['./sections/bibliography/bibliography.bib']
