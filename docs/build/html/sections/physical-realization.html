@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Physical Realization &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Future Work" href="future-work.html" />
+    <link rel="prev" title="Verification" href="verification.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">Verification</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Physical Realization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#register-retiming">Register Retiming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pipelining-configuration-options">Pipelining Configuration Options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#enablefetchbufferflowthrough">EnableFetchBufferFlowThrough</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#enablebrresolutionregister">EnableBrResolutionRegister</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#functional-unit-latencies">Functional Unit Latencies</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Physical Realization</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sections/physical-realization.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="physical-realization">
+<h1>Physical Realization<a class="headerlink" href="#physical-realization" title="Permalink to this headline">¶</a></h1>
+<p>This chapter provides information useful for physically realizing the
+BOOM processor. Although BOOM VLSI work is very preliminary, it has been
+synthesized at 1 GHz on a high-end mobile 28 nm process. Unfortunately,
+while VLSI flows are difficult to share or make portable (and encumbered
+with proprietary libraries and tools), an enterprising individual may
+want to visit the <a class="reference external" href="https://github.com/ucb-bar/plsi">https://github.com/ucb-bar/plsi</a> portable “Palmer’s
+VLSI Scripts” repository which describes one way to push BOOM through a
+VLSI flow.</p>
+<div class="section" id="register-retiming">
+<h2>Register Retiming<a class="headerlink" href="#register-retiming" title="Permalink to this headline">¶</a></h2>
+<p>Many VLSI tools require the designer to manually specify which modules
+need to be analyzed for retiming.</p>
+<p>In BOOM, the floating point units and the pipelined integer multiply
+unit are described combinationally and then padded to the requested
+latency with registers. In order to meet the desired clock frequency,
+<strong>the floating point units and the pipelined integer multiply unit must
+be register-retimed</strong>.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">mul_result</span> <span class="k">=</span> <span class="n">lhs</span><span class="o">.</span><span class="n">toSInt</span> <span class="o">*</span> <span class="n">rhs</span><span class="o">.</span><span class="n">toSInt</span>
+
+<span class="k">val</span> <span class="n">mul_output_mux</span> <span class="k">=</span> <span class="nc">MuxCase</span><span class="o">(</span>
+   <span class="nc">UInt</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">64</span><span class="o">),</span> <span class="nc">Array</span><span class="o">(</span>
+      <span class="nc">FN</span><span class="o">(</span><span class="nc">DW_64</span><span class="o">,</span> <span class="nc">FN_MUL</span><span class="o">)</span>    <span class="o">-&gt;</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">63</span><span class="o">,</span><span class="mi">0</span><span class="o">),</span>
+      <span class="nc">FN</span><span class="o">(</span><span class="nc">DW_64</span><span class="o">,</span> <span class="nc">FN_MULH</span><span class="o">)</span>   <span class="o">-&gt;</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">127</span><span class="o">,</span><span class="mi">64</span><span class="o">),</span>
+      <span class="nc">FN</span><span class="o">(</span><span class="nc">DW_64</span><span class="o">,</span> <span class="nc">FN_MULHU</span><span class="o">)</span>  <span class="o">-&gt;</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">127</span><span class="o">,</span><span class="mi">64</span><span class="o">),</span>
+      <span class="nc">FN</span><span class="o">(</span><span class="nc">DW_64</span><span class="o">,</span> <span class="nc">FN_MULHSU</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">127</span><span class="o">,</span><span class="mi">64</span><span class="o">),</span>
+      <span class="nc">FN</span><span class="o">(</span><span class="nc">DW_32</span><span class="o">,</span> <span class="nc">FN_MUL</span><span class="o">)</span>    <span class="o">-&gt;</span> <span class="nc">Cat</span><span class="o">(</span><span class="nc">Fill</span><span class="o">(</span><span class="mi">32</span><span class="o">,</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">31</span><span class="o">)),</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">31</span><span class="o">,</span><span class="mi">0</span><span class="o">)),</span>
+      <span class="nc">FN</span><span class="o">(</span><span class="nc">DW_32</span><span class="o">,</span> <span class="nc">FN_MULH</span><span class="o">)</span>   <span class="o">-&gt;</span> <span class="nc">Cat</span><span class="o">(</span><span class="nc">Fill</span><span class="o">(</span><span class="mi">32</span><span class="o">,</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">63</span><span class="o">)),</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">63</span><span class="o">,</span><span class="mi">32</span><span class="o">)),</span>
+      <span class="nc">FN</span><span class="o">(</span><span class="nc">DW_32</span><span class="o">,</span> <span class="nc">FN_MULHU</span><span class="o">)</span>  <span class="o">-&gt;</span> <span class="nc">Cat</span><span class="o">(</span><span class="nc">Fill</span><span class="o">(</span><span class="mi">32</span><span class="o">,</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">63</span><span class="o">)),</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">63</span><span class="o">,</span><span class="mi">32</span><span class="o">)),</span>
+      <span class="nc">FN</span><span class="o">(</span><span class="nc">DW_32</span><span class="o">,</span> <span class="nc">FN_MULHSU</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Cat</span><span class="o">(</span><span class="nc">Fill</span><span class="o">(</span><span class="mi">32</span><span class="o">,</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">63</span><span class="o">)),</span> <span class="n">mul_result</span><span class="o">(</span><span class="mi">63</span><span class="o">,</span><span class="mi">32</span><span class="o">))</span>
+<span class="o">))</span>
+
+<span class="n">io</span><span class="o">.</span><span class="n">out</span> <span class="o">:=</span> <span class="nc">ShiftRegister</span><span class="o">(</span><span class="n">mul_output_mux</span><span class="o">,</span> <span class="n">imul_stages</span><span class="o">,</span> <span class="n">io</span><span class="o">.</span><span class="n">valid</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pipelining-configuration-options">
+<h2>Pipelining Configuration Options<a class="headerlink" href="#pipelining-configuration-options" title="Permalink to this headline">¶</a></h2>
+<p>Although BOOM does not provide high-level configurable-latency pipeline
+stages, BOOM does provide a few configuration options to help the
+implementor trade off CPI performance for cycle-time.</p>
+<div class="section" id="enablefetchbufferflowthrough">
+<h3>EnableFetchBufferFlowThrough<a class="headerlink" href="#enablefetchbufferflowthrough" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="terminology.html#term-Front-end"><span class="xref std std-term">Front-end</span></a> fetches instructions and places them into a <a class="reference internal" href="terminology.html#term-Fetch-Buffer"><span class="xref std std-term">Fetch Buffer</span></a>.
+The <a class="reference internal" href="terminology.html#term-Back-end"><span class="xref std std-term">Back-end</span></a> pulls instructions out of the <a class="reference internal" href="terminology.html#term-Fetch-Buffer"><span class="xref std std-term">Fetch Buffer</span></a> and
+then decodes, renames, and dispatches the instructions into the <em>Issue
+Queue</em>. This <a class="reference internal" href="terminology.html#term-Fetch-Buffer"><span class="xref std std-term">Fetch Buffer</span></a> can be optionally set to be a <em>flow-through</em>
+queue – instructions enqueued into the buffer can be immediately
+dequeued on the other side on the same clock cycle. Turning this option
+<strong>off</strong> forces all instructions to spend at least one cycle in the queue
+but decreases the critical path between instruction fetch and dispatch.</p>
+</div>
+<div class="section" id="enablebrresolutionregister">
+<h3>EnableBrResolutionRegister<a class="headerlink" href="#enablebrresolutionregister" title="Permalink to this headline">¶</a></h3>
+<p>The branch unit resolves branches, detects mispredictions, fans out the
+branch kill signal to <em>all</em> inflight <a class="reference internal" href="terminology.html#term-Micro-Op-UOP"><span class="xref std std-term">Micro-Ops (UOPs)</span></a>, redirects the PC select
+stage to begin fetching down the correct path, and sends snapshot
+information to the branch predictor to reset its state properly so it
+can begin predicting down the correct path. Turning this option <strong>on</strong>
+delays the branch resolution by a cycle. In particular, this adds a
+cycle to the branch misprediction penalty (which is hopefully a rare
+event).</p>
+</div>
+<div class="section" id="functional-unit-latencies">
+<h3>Functional Unit Latencies<a class="headerlink" href="#functional-unit-latencies" title="Permalink to this headline">¶</a></h3>
+<p>The latencies of the pipelined floating point units and the pipelined
+integer multiplier unit can be modified. Currently, all floating point
+unit latencies are set to the latency of the longest floating point unit
+(i.e., the DFMA unit). This can be changed by setting the <em>dfmaLatency</em>
+in the <em>FPUConfig</em> class. Likewise, the integer multiplier is also set
+to the <em>dfmaLatency</em>. <a class="footnote-reference brackets" href="#id2" id="id1">1</a></p>
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>The reason for this is that the imul unit is most likely sharing a
+write port with the DFMA unit and so must be padded out to the same
+length. However, this isn’t fundamental and there’s no reason an imul
+unit not sharing a write port with the FPUs should be constrained to
+their latencies.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="future-work.html" class="btn btn-neutral float-right" title="Future Work" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="verification.html" class="btn btn-neutral float-left" title="Verification" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

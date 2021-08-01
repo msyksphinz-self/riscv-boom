@@ -1,0 +1,368 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The BOOM Development Ecosystem &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Debugging" href="debugging.html" />
+    <link rel="prev" title="Parameterization" href="parameterization.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="parameterization.html">Parameterization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The BOOM Development Ecosystem</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-boom-repository">The BOOM Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scala-chisel-generators-configs-oh-my">Scala, Chisel, Generators, Configs, Oh My!</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#recap-on-coding-in-scala-chisel">Recap on Coding in Scala/Chisel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generating-a-boom-system">Generating a BOOM System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compilation-and-elaboration">Compilation and Elaboration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quickly-on-firrtl">Quickly on Firrtl</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#big-picture">Big Picture</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#more-resources">More Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>The BOOM Development Ecosystem</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sections/boom-ecosystem.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="the-boom-development-ecosystem">
+<h1>The BOOM Development Ecosystem<a class="headerlink" href="#the-boom-development-ecosystem" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="the-boom-repository">
+<h2>The BOOM Repository<a class="headerlink" href="#the-boom-repository" title="Permalink to this headline">¶</a></h2>
+<p>The BOOM repository holds the source code to the BOOM core; it is not a full processor and thus is <strong>NOT A SELF-RUNNING</strong> repository.
+To instantiate a BOOM core, you must use a top-level project to integrate the core into an SoC. For this purpose you can use
+the <a class="reference external" href="https://github.com/ucb-bar/chipyard">Chipyard Template</a>.</p>
+<p>The BOOM core source code can be found in <code class="docutils literal notranslate"><span class="pre">src/main/scala</span></code>.</p>
+<p>The core code structure is shown below:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">src/main/scala/</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">bpu/</span></code> - branch predictor unit</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">common/</span></code> - configs fragments, constants, bundles, tile definitions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exu/</span></code> - execute/core unit</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ifu/</span></code> - instruction fetch unit</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lsu/</span></code> - load/store/memory unit</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">util/</span></code> - utilities</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="scala-chisel-generators-configs-oh-my">
+<h2>Scala, Chisel, Generators, Configs, Oh My!<a class="headerlink" href="#scala-chisel-generators-configs-oh-my" title="Permalink to this headline">¶</a></h2>
+<p>Working with BOOM has a large learning curve for those people new to <em>Chisel</em> and the BOOM ecosystem.
+To be productive, it takes time to learn about the micro-architecture, <em>Rocket chip</em> components, <em>Chisel</em> (maybe <em>Firrtl</em>), <em>Scala</em>, and the build system.
+Luckily, the micro-architecture is detailed in this documentation and some of the other topics (<em>Chisel</em>, <em>Firrtl</em>, <em>Scala</em>) are discussed in their respective websites.
+Instead of focusing solely on those topics, this section hopes to show how they all fit together by giving a high level of the entire build process.
+Put in more specific terms: How do you get from <em>Scala</em>/<em>Chisel</em> to Verilog? <a class="footnote-reference brackets" href="#id3" id="id1">1</a></p>
+<div class="section" id="recap-on-coding-in-scala-chisel">
+<h3>Recap on Coding in Scala/Chisel<a class="headerlink" href="#recap-on-coding-in-scala-chisel" title="Permalink to this headline">¶</a></h3>
+<p>When making changes to BOOM, you are working in <em>Scala</em>/<em>Chisel</em> code.
+<em>Chisel</em> is the language embedded inside of <em>Scala</em> to create RTL.
+One way to view <em>Scala</em>/<em>Chisel</em> is that <em>Chisel</em> is a set of libraries that are used in <em>Scala</em> that help hardware designers create highly parameterizable RTL.
+For example, if you want to make a hardware queue, you would use something like <em>Chisel</em>’s <code class="docutils literal notranslate"><span class="pre">chisel3.util.Queue</span></code> to make a queue.
+However, if you want to change the amount of entries of the queue based on some variable, that would be <em>Scala</em> code.
+Another way to think of the distinction between the two languages is that <em>Chisel</em> code will make a circuit in hardware while <em>Scala</em> code will change the parameters of the circuit that <em>Chisel</em> will create.
+A simple example is shown below in <a class="reference internal" href="#scala-chisel-example"><span class="std std-numref">Listing 3</span></a>.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<span id="scala-chisel-example"></span><div class="code-block-caption"><span class="caption-number">Listing 3 </span><span class="caption-text">Scala and Chisel Code</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">var</span> <span class="nc">Q_DEPTH</span> <span class="k">=</span> <span class="mi">1</span> <span class="c1">// Scala variable</span>
+<span class="k">if</span> <span class="o">(</span><span class="nc">WANT_HUGE_QUEUE</span> <span class="o">==</span> <span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">Q_DEPTH</span> <span class="k">=</span> <span class="mi">123456789</span> <span class="c1">// Big number!</span>
+<span class="o">}</span>
+<span class="k">else</span> <span class="o">{</span>
+    <span class="nc">Q_DEPTH</span> <span class="k">=</span> <span class="mi">1</span> <span class="c1">// Small number.</span>
+<span class="o">}</span>
+
+<span class="c1">// Create a queue through Chisel with the parameter specified by a Scala variable</span>
+<span class="k">val</span> <span class="n">queue</span> <span class="k">=</span> <span class="nc">Module</span><span class="o">(</span><span class="k">new</span> <span class="n">chisel3</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="nc">Queue</span><span class="o">(</span><span class="nc">HardwareDataType</span><span class="o">,</span> <span class="nc">Q_DEPTH</span><span class="o">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="generating-a-boom-system">
+<h3>Generating a BOOM System<a class="headerlink" href="#generating-a-boom-system" title="Permalink to this headline">¶</a></h3>
+<p>The word “generator” used in many <em>Chisel</em> projects refers to a program that takes in a <em>Chisel Module</em> and a <em>Configuration</em> and returns a circuit based on those parameters.
+The generator for BOOM and Rocket SoC’s can be found in Chipyard under the <code class="docutils literal notranslate"><span class="pre">Generator.scala</span></code> file.
+The <em>Chisel Module</em> used in the generator is normally the top-level <em>Chisel Module</em> class that you (the developer) want to make a circuit of.
+The <em>Configuration</em> is just a set of <em>Scala</em> variables used to configure the parameters of the passed in <em>Chisel Module</em>.
+In BOOM’s case, the top-level <em>Module</em> would be something like the BoomRocketSystem found in <code class="docutils literal notranslate"><span class="pre">src/main/scala/system/BoomRocketSystem.scala</span></code> and a <em>Configuration</em> like MediumBoomConfig found in <code class="docutils literal notranslate"><span class="pre">src/main/scala/common/configs.scala</span></code>. <a class="footnote-reference brackets" href="#id4" id="id2">2</a>
+In this case, the parameters specified in MediumBoomConfig would set the necessary <em>Scala</em> variables needed throughout the ExampleBoomSystem <em>Module</em>.
+Once the <em>Module</em> and <em>Configuration</em> is passed into the generator, they will be combined to form a piece of RTL representing the circuit given by the <em>Module</em> parameterized by the <em>Configuration</em>.</p>
+</div>
+<div class="section" id="compilation-and-elaboration">
+<h3>Compilation and Elaboration<a class="headerlink" href="#compilation-and-elaboration" title="Permalink to this headline">¶</a></h3>
+<p>Since the generator is just a <em>Scala</em> program, all <em>Scala</em>/<em>Chisel</em> sources must be built.
+This is the <em>compilation</em> step.
+If <em>Chisel</em> is thought as a library within <em>Scala</em>, then these classes being built are just <em>Scala</em> classes which call <em>Chisel</em> functions.
+Thus, any errors that you get in compiling the <em>Scala</em>/<em>Chisel</em> files are errors that you have violated the typing system, messed up syntax, or more.
+After the <em>compilation</em> is complete, <em>elaboration</em> begins.
+The generator starts <em>elaboration</em> using the <em>Module</em> and <em>Configuration</em> passed to it.
+This is where the <em>Chisel</em> “library functions” are called with the parameters given and <em>Chisel</em> tries to construct a circuit based on the <em>Chisel</em> code.
+If a runtime error happens here, <em>Chisel</em> is stating that it cannot “build” your circuit due to “violations” between your code and the Chisel “library”.
+However, if that passes, the output of the generator gives you an RTL file!</p>
+</div>
+<div class="section" id="quickly-on-firrtl">
+<h3>Quickly on Firrtl<a class="headerlink" href="#quickly-on-firrtl" title="Permalink to this headline">¶</a></h3>
+<p>Up until this point, I have been saying that your generator gives you a RTL file.
+However… this is not true.
+Instead the generator emits <a class="reference external" href="https://github.com/freechipsproject/firrtl">Firrtl</a>, an intermediate representation of your circuit.
+Without going into too much detail, this <em>Firrtl</em> is consumed by a <em>Firrtl</em> compiler (another <em>Scala</em> program) which passes the circuit through a series of circuit-level transformations.
+An example of a <em>Firrtl</em> pass (transformation) is one that optimizes out unused signals.
+Once the transformations are done, a Verilog file is emitted and the build process is done!</p>
+</div>
+<div class="section" id="big-picture">
+<h3>Big Picture<a class="headerlink" href="#big-picture" title="Permalink to this headline">¶</a></h3>
+<p>Now that the flow of ecosystem has been briefly explained here is a quick recap.</p>
+<ol class="arabic simple">
+<li><p>You write code in <em>Scala</em> + <em>Chisel</em> (where <em>Chisel</em> can be seen as a library that <em>Scala</em> uses)</p></li>
+<li><p>You compile the <em>Scala</em> + <em>Chisel</em> into classes to be used by the generator</p></li>
+<li><p>Deal with compile errors (related to syntax, type system violations, or more)</p></li>
+<li><p>You run the generator with the <em>Module</em> and <em>Configuration</em> for your circuit to get the <em>Firrtl</em> output file</p></li>
+<li><p>Deal with runtime errors (<em>Chisel</em> elaboration errors, which may occur from violating Chisel’s expectations)</p></li>
+<li><p>You run the <em>Firrtl</em> compiler on the output <em>Firrtl</em> file to get a Verilog output file</p></li>
+<li><p>Deal with runtime errors (<em>Firrtl</em> compile errors, which occur from compiler passes that perform checks e.g. for uninitialized wires)</p></li>
+<li><p>Done. A Verilog file was created!!!</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="more-resources">
+<h2>More Resources<a class="headerlink" href="#more-resources" title="Permalink to this headline">¶</a></h2>
+<p>If you would like more detail on top-level integration, how accelerators work in the Rocket Chip system, and much more please visit the
+<a class="reference external" href="https://chipyard.readthedocs.io/en/latest/">Chipyard Documentation</a>.</p>
+<dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>This section describes the current build process that is used in <a class="reference external" href="https://github.com/ucb-bar/chipyard">Chipyard</a>.</p>
+</dd>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>This is not exactly true since to be able to run BOOM in simulations we wrap the BoomRocketSystem in a TestHarness found in Chipyard.</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="debugging.html" class="btn btn-neutral float-right" title="Debugging" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="parameterization.html" class="btn btn-neutral float-left" title="Parameterization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,354 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ロードストアユニット(LSU) &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The Memory System" href="memory-system.html" />
+    <link rel="prev" title="実行パイプライン" href="execution-stages.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ロードストアユニット(LSU)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">ストア命令</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#micro-ops">ストア Micro-Ops</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">ロード命令</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#boom">BOOMのメモリモデル</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">同一アドレスに対するロードの順序</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">メモリのオーダリングの失敗</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>ロードストアユニット(LSU)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sections/load-store-unit.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lsu">
+<h1>ロードストアユニット(LSU)<a class="headerlink" href="#lsu" title="Permalink to this headline">¶</a></h1>
+<div class="figure align-default" id="id10">
+<span id="id1"></span><img alt="Load Store Unit" src="../_images/lsu.png" />
+<p class="caption"><span class="caption-number">Fig. 24 </span><span class="caption-text">ロードストアユニット</span><a class="headerlink" href="#id10" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>LSU（Load/Store Unit）</strong> は、メモリシステムへのメモリ操作の発火タイミングを決定する役割を担っています。
+<strong>ロードキュー(LDQ)</strong> と <strong>ストアキュー(STQ)</strong> の2つのキューがあります。
+ロード命令は、”uopLD” <a class="reference internal" href="terminology.html#term-Micro-Op-UOP"><span class="xref std std-term">Micro-Op (UOP)</span></a> を生成します。
+uopLD は発行されるとロードアドレスを計算し、その結果をLDQに格納します。
+ストア命令では、”uopSTA”（ストアアドレス生成）と”uopSTD”（ストアデータ生成）の <em>2つの</em> <a class="reference internal" href="terminology.html#term-Micro-Op-UOP"><span class="xref std std-term">UOP</span></a> を生成します。
+STA <a class="reference internal" href="terminology.html#term-Micro-Op-UOP"><span class="xref std std-term">UOP</span></a> は、ストアアドレスを計算し、STQエントリのアドレスを更新します。
+STD <a class="reference internal" href="terminology.html#term-Micro-Op-UOP"><span class="xref std std-term">UOP</span></a> は、ストアデータをSTQエントリに移動させます。
+これらの各 <a class="reference internal" href="terminology.html#term-Micro-Op-UOP"><span class="xref std std-term">UOP</span></a> は、オペランドの準備が整い次第、 <em>命令発行ウィンドウ</em> から発行されます。
+ストアの <a class="reference internal" href="terminology.html#term-Micro-Op-UOP"><span class="xref std std-term">UOP</span></a> の仕様の詳細については、 <span class="xref std std-ref">Store Micro-Ops</span> を参照してください。</p>
+<div class="section" id="id2">
+<h2>ストア命令<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>ストアキューのエントリは、デコード時に確保されます（stq(i).validがセットされます）。
+Validビットは、STQ内のエントリが有効なアドレスと有効なデータを保持していることを示します（stq(i).bits.addr.validおよびstq(i).bits.data.valid）。
+ストア命令がコミットされると、ストアキューの対応するエントリがコミットされたとマークされます。
+その後、ストアは自由にメモリシステムに送信されます。
+ストアはプログラム順にメモリに投入されます。</p>
+</div>
+<div class="section" id="micro-ops">
+<h2>ストア Micro-Ops<a class="headerlink" href="#micro-ops" title="Permalink to this headline">¶</a></h2>
+<p>ストアは命令発行ウィンドウに1つの命令として挿入されます（別々のaddr-genおよびdata-gen <span class="xref std std-term">UOP</span> としてLSUに発行することができます。
+これにより、ストア命令は2つのレジスタファイルリードポートにアクセスする必要がありますが、これはストアを多用するコードでパフォーマンスを半減させたくないという思いからです。
+スタックへのストアを含むシーケンスは、IPC=1で動作しなければなりません。</p>
+<p>しかし、ストア・アドレスはストア・データのかなり前から知っているのが普通です。
+ストアアドレスはできるだけ早くSTQに移動させ、後でロードできるようにして、メモリ順序の失敗を回避する必要があります。
+このように、命令発行ウィンドウは必要に応じてuopSTAまたはuopSTD <a class="reference internal" href="terminology.html#term-Micro-Op-UOP"><span class="xref std std-term">UOP</span></a> を発するが、
+第2オペランドの準備が整うまでストアの残り半分を保持する。</p>
+</div>
+<div class="section" id="id3">
+<h2>ロード命令<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>ロードキュー(LDQ)のエントリは、 <em>デコード</em> の段階で割り当てられます (<code class="docutils literal notranslate"><span class="pre">ldq(i).valid</span></code>)。
+<strong>デコード</strong> ステージ中に、書くロードエントリは <em>ストアマスク</em> (<code class="docutils literal notranslate"><span class="pre">ldq(i).bits.st\_dep\_mask</span></code>) が割り当てられます。
+これはストアキュー内のどのストアに依存しているかを示すものです。
+ストアがメモリに実行されてストアキューから離れると、 <em>ストアマスク</em> の適切なビットがクリアされます。</p>
+<p>ロードアドレスが計算されてLDQに配置されると、対応する*valid*ビットが設定されます（<code class="docutils literal notranslate"><span class="pre">ldq(i).addr.valid</span></code>）。</p>
+<p>ロードは、LSUに到着した時点で、最適な方法でメモリに実行されます（ロードが早期にファイアーされることは、アウトオブオーダー・パイプラインの大きなメリットです）。
+同時に、ロード命令は自分のアドレスと、依存するすべてのストアアドレスを比較します。
+一致した場合、そのメモリ要求はキャンセルされます。
+対応するストアデータが存在すれば、そのストアデータはロードに <em>転送</em> され、ロードは <em>成功</em> したと判断します。
+ストアデータが存在しない場合は、ロードは <em>スリープ</em> に入ります。スリープ状態になったロードは、後から再試行されます。<a class="footnote-reference brackets" href="#id8" id="id4">1</a></p>
+</div>
+<div class="section" id="boom">
+<h2>BOOMのメモリモデル<a class="headerlink" href="#boom" title="Permalink to this headline">¶</a></h2>
+<p>BOOMはRVWMOメモリコンシステンシモデルに従います。</p>
+<p>現在BOOMは以下のような動作をしています。</p>
+<ol class="arabic simple">
+<li><p>書き込み→読み込みの制約が緩和された（新しいロードが古いストアより先に実行されることがある 新しいロードが古いストアより先に実行される可能性があります)。</p></li>
+<li><p>読み出し→読み出しの制約は維持されます（同じアドレスへのロードは 順番に現れる）。</p></li>
+<li><p>スレッドは自分の書き込みを早く読むことができます。</p></li>
+</ol>
+<div class="section" id="id5">
+<h3>同一アドレスに対するロードの順序<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>RISC-VのWMOメモリモデルでは、同じアドレスへのロードは順番に行う必要があります。<a class="footnote-reference brackets" href="#id9" id="id6">2</a>
+これにより、ロードはアドレス衝突の可能性がないか、他のロードに対して検索する必要があります。
+アドレスが一致する古いロードの前に若いロードが実行された場合、若いロードは再生され、パイプライン内の後続の命令はフラッシュされなければなりません。
+しかし、このシナリオが必要になるのは、キャッシュコヒーレンスのプローブイベントがコアのメモリをスヌープして、
+他のスレッドに並び替えを暴露した場合だけです。
+プローブイベントが発生しなければ、ロードリオーダリングは安全に行われるでしょう。</p>
+</div>
+</div>
+<div class="section" id="id7">
+<h2>メモリのオーダリングの失敗<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p>ロード/ストアユニットでは、ストア→ロードの依存関係に注意しなければなりません。
+最高のパフォーマンスを得るためには、ロードをできるだけ早くメモリに投入する必要があります。</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sw x1 -&gt; <span class="m">0</span><span class="o">(</span>x2<span class="o">)</span>
+ld x3 &lt;- <span class="m">0</span><span class="o">(</span>x4<span class="o">)</span>
+</pre></div>
+</div>
+<p>しかし、x2とx4が同じメモリアドレスを参照している場合、この例のロードは、先に発行されたストアに <em>依存</em> しています。
+ストアが発行される前にロードがメモリに発行された場合、ロードはメモリから間違った値を読み出すことになり、 <em>メモリ順序付けの失敗</em> が発生します。
+順番に失敗した場合、パイプラインをフラッシュし、リネームマップテーブルをリセットしなければなりません。これは非常に高価な処理です。</p>
+<p>順番付けの失敗を発見するために、ストアがコミットするときに、LDQ全体でアドレスの一致をチェックします。
+一致した場合、ストアはロードが実行されたかどうか、またデータがメモリから取得されたものか、古いストアから転送されたものかを確認します。
+いずれの場合も、メモリオーダーの失敗が発生しています。</p>
+<p>ロード/ストアユニットの詳細については、 <a class="reference internal" href="#id1"><span class="std std-numref">Fig. 24</span></a> を参照してください。</p>
+<dl class="footnote brackets">
+<dt class="label" id="id8"><span class="brackets"><a class="fn-backref" href="#id4">1</a></span></dt>
+<dd><p>より高性能なプロセッサでは、ロードがスリープ状態になった原因を追跡し、
+ロードをブロックしているされた原因が解消された時点で負荷を起こします。</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id9"><span class="brackets"><a class="fn-backref" href="#id6">2</a></span></dt>
+<dd><p>技術的には、 <em>fence.r.r</em> を使用して、依存性のあるロードをリオーダするマシン上でのソフトウェアの正しい実行を提供することができます。
+しかし、ISAが依存性ロードのリオーダリングを禁止する理由は2つあります。1）他のポピュラーなISAではこのような緩和を認めていないため、
+ソフトウェアをRISC-Vに移植する際に、新たな課題が生じる可能性があること、
+2）慎重なソフトウェアは、適切な <em>fence</em> 命令を自由に使いすぎて、ソフトウェアの速度低下を招く可能性があること、です。
+ありがたいことに、順序付きの依存性ロードを強制することは、実際にはそれほどコストがかからないかもしれません。
+まず、ロードアドレスは早い段階で判明しており、どのような場合でもインオーダーで実行される可能性があります。
+第二に、順序違いのロードは、キャッシュコヒーレンスプローブのキャッシュ内でのみ問題となるため、パフォーマンス上のペナルティは無視できるでしょう。
+ロードは、ストアが既に使用しているLAQのCAM検索ポートと同じものを使用できます。
+1サイクルに1つのロードとストアのアドレス計算をサポートする場合には問題となる可能性がありますが、余分なCAMサーチポートはバンキングによって軽減されるか、
+より多くのキャッシュバンド幅をサポートするために必要な他のハードウェアコストに比べて小さいものとなります。</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="memory-system.html" class="btn btn-neutral float-right" title="The Memory System" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="execution-stages.html" class="btn btn-neutral float-left" title="実行パイプライン" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

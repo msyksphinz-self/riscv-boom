@@ -1,0 +1,359 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Micro-architectural Event Tracking &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Verification" href="verification.html" />
+    <link rel="prev" title="Debugging" href="debugging.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Micro-architectural Event Tracking</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#setup-hpm-events-to-track">Setup HPM events to track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reading-hpm-counters-in-software">Reading HPM counters in software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-your-own-hpe">Adding your own HPE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#external-resources">External Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Micro-architectural Event Tracking</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sections/uarch-counters.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="micro-architectural-event-tracking">
+<h1>Micro-architectural Event Tracking<a class="headerlink" href="#micro-architectural-event-tracking" title="Permalink to this headline">¶</a></h1>
+<p>Version 1.9.1 of the RISC-V Privileged Architecture adds support for
+<strong>Hardware Performance Monitor (HPM)</strong> counters. <a class="footnote-reference brackets" href="#id2" id="id1">1</a> The HPM support allows
+a nearly infinite number of micro-architectural events (called <strong>Hardware
+Performance Events (HPEs)</strong>) to be multiplexed onto up to multiple physical counters
+(called <strong>Hardware Performance Counters (HPCs)</strong>).</p>
+<div class="section" id="setup-hpm-events-to-track">
+<h2>Setup HPM events to track<a class="headerlink" href="#setup-hpm-events-to-track" title="Permalink to this headline">¶</a></h2>
+<p>The available HPE’s are split into <em>event sets</em> and <em>events</em>.
+<em>Event sets</em> are groupings of similar microarchitectural <em>events</em> (branch prediction events,
+memory events, etc). To access an <em>HPE</em> you must choose the correct <em>event set</em> and
+<em>event</em> bit and write to the proper HPC register for that event. An example of event set
+numbers and the event bit for a particular event is given below.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 20%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Event Set #</p></th>
+<th class="head"><p>Event Bit</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>I$ Blocked</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>2</p></td>
+<td><p>NOP</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>4</p></td>
+<td><p>Control Flow Target Mispredict</p></td>
+</tr>
+</tbody>
+</table>
+<p>To access an HPC, you must first set up the privilege access level
+of the particular HPC using <code class="docutils literal notranslate"><span class="pre">mcounteren</span></code> and <code class="docutils literal notranslate"><span class="pre">scounteren</span></code>. Afterwards,
+you write to the particular HPC register to setup which event(s) you want to
+track. Bits [7:0] of the HPC register correspond to the event set while bits [?:8]
+correspond to the event bitmask. Note that the bitmask can be a
+singular event <strong>or</strong> multiple events.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<span id="enable-uarch-counters"></span><div class="code-block-caption"><span class="caption-number">Listing 4 </span><span class="caption-text">Enable Hardware Performance Monitor Counters</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">write_csr</span><span class="p">(</span><span class="n">mcounteren</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// Enable supervisor use of all perf counters</span>
+<span class="n">write_csr</span><span class="p">(</span><span class="n">scounteren</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// Enable user use of all perf counters</span>
+
+<span class="n">write_csr</span><span class="p">(</span><span class="n">mhpmevent3</span><span class="p">,</span> <span class="mh">0x101</span><span class="p">);</span> <span class="c1">// read I$ Blocked event</span>
+<span class="n">write_csr</span><span class="p">(</span><span class="n">mhpmevent4</span><span class="p">,</span> <span class="mh">0x801</span><span class="p">);</span> <span class="c1">// read Ctrl Flow Target Mispred. event</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="reading-hpm-counters-in-software">
+<h2>Reading HPM counters in software<a class="headerlink" href="#reading-hpm-counters-in-software" title="Permalink to this headline">¶</a></h2>
+<p>The Code Example <a class="reference internal" href="#read-csr"><span class="std std-numref">Listing 5</span></a> demonstrates how to read the value of
+any HPC from software. Note that HPCs need to be “zero’d” out
+by first reading the value at the beginning of the program, then reading the
+counter again the end, and then subtracting the initial value from the second
+read. However, this only applies to the HPC’s not <code class="docutils literal notranslate"><span class="pre">cycle</span></code>, <code class="docutils literal notranslate"><span class="pre">instret</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">time</span></code>.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<span id="read-csr"></span><div class="code-block-caption"><span class="caption-number">Listing 5 </span><span class="caption-text">Read CSR Register</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define read_csr_safe(reg) ({ register long __tmp asm(&quot;a0&quot;); \</span>
+<span class="cp">        asm volatile (&quot;csrr %0, &quot; #reg : &quot;=r&quot;(__tmp)); \</span>
+<span class="cp">        __tmp; })</span>
+
+<span class="c1">// read cycle and instruction counts in user mode</span>
+<span class="kt">uint64_t</span> <span class="n">csr_cycle</span>  <span class="o">=</span> <span class="n">read_csr_safe</span><span class="p">(</span><span class="n">cycle</span><span class="p">);</span>
+<span class="kt">uint64_t</span> <span class="n">csr_instr</span>  <span class="o">=</span> <span class="n">read_csr_safe</span><span class="p">(</span><span class="n">instret</span><span class="p">);</span>
+
+<span class="c1">// read initial value of HPMC&#39;s in user mode</span>
+<span class="kt">uint64_t</span> <span class="n">start_hpmc3</span>  <span class="o">=</span> <span class="n">read_csr_safe</span><span class="p">(</span><span class="n">hpmcounter3</span><span class="p">);</span>
+<span class="p">...</span>
+<span class="kt">uint64_t</span> <span class="n">start_hpmc31</span> <span class="o">=</span> <span class="n">read_csr_safe</span><span class="p">(</span><span class="n">hpmcounter31</span><span class="p">);</span>
+
+<span class="c1">// program to monitor</span>
+
+<span class="c1">// read final value of HPMC&#39;s and substract initial in user mode</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Value of Event (zero&#39;d): %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">read_csr_safe</span><span class="p">(</span><span class="n">hpmcounter3</span><span class="p">)</span> <span class="o">-</span> <span class="n">start_hpmc3</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="adding-your-own-hpe">
+<h2>Adding your own HPE<a class="headerlink" href="#adding-your-own-hpe" title="Permalink to this headline">¶</a></h2>
+<p>To add your own HPE, you modify the event set and particular event in
+<code class="docutils literal notranslate"><span class="pre">src/main/scala/exu/core.scala</span></code>. Note that the 1st item in the <code class="docutils literal notranslate"><span class="pre">Seq</span></code> corresponds
+to the first bit in the event set.</p>
+</div>
+<div class="section" id="external-resources">
+<h2>External Resources<a class="headerlink" href="#external-resources" title="Permalink to this headline">¶</a></h2>
+<p>Information in this section was adapted from <a class="reference external" href="https://static.dev.sifive.com/U54-MC-RVCoreIP.pdf">https://static.dev.sifive.com/U54-MC-RVCoreIP.pdf</a>
+which details more about HPE/C’s from RocketChip’s perspective. Note: The HPE’s supported by
+Rocket and BOOM differ, but the mechanism to access them is the same!</p>
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Future efforts may add some counters into a memory-mapped access
+region. This will open up the ability to track events that, for
+example, may not be tied to any particular core (like last-level
+cache misses).</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="verification.html" class="btn btn-neutral float-right" title="Verification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="debugging.html" class="btn btn-neutral float-left" title="Debugging" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

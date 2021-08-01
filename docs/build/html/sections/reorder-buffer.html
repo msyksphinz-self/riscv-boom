@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>リオーダバッファ(ROB)とディスパッチステージ &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="命令発行ユニット" href="issue-units.html" />
+    <link rel="prev" title="リネームステージ" href="rename-stage.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">リオーダバッファ(ROB)とディスパッチステージ</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">ROBの構成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">ROBの状態</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">例外の状態</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pc">PCの保存</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">コミットステージ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">例外とフラッシュ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id8">パラメータ：ロールバックと1サイクルリセット</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">例外要因</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#point-of-no-return-pnr">Point of No Return (PNR)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>リオーダバッファ(ROB)とディスパッチステージ</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sections/reorder-buffer.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="rob-dispatch-stage"></span><div class="section" id="rob">
+<h1>リオーダバッファ(ROB)とディスパッチステージ<a class="headerlink" href="#rob" title="Permalink to this headline">¶</a></h1>
+<p><strong>リオーダバッファ</strong> は、パイプライン内のすべてのインフライト命令の状態を追跡します。
+ROBの役割は、プログラマに自分のプログラムがインオーダーで実行されているように見せることです。
+命令がデコードされ、リネームされると、その命令はROBと <strong>命令キュー</strong> に <em>ディスパッチ</em> され、 <em>busy</em> とマークされます。
+命令の実行が終了すると、ROBに通知され、 <em>not busy</em> とマークされます。
+ROBの”先頭”がビジー状態でなくなると、その命令は “コミット “され、アーキテクチャの状態が見えるようになります。
+例外が発生し、例外命令がROBの先頭にある場合は、パイプラインがフラッシュされ、例外命令の後に発生したアーキテクチャの変更は表示されません。
+そして、ROBはPCを適切な例外ハンドラにリダイレクトします。</p>
+<div class="section" id="id1">
+<h2>ROBの構成<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-default" id="id13">
+<span id="id2"></span><img alt="The Reorder Buffer" src="../_images/rob.png" />
+<p class="caption"><span class="caption-number">Fig. 16 </span><span class="caption-text">3命令発行の2ワイドBOOMのリオーダバッファです。ディスパッチされたUops(dis uops)はROBの下側(rob tail)に書き込まれ、
+コミットされたUops(com uops)は上側(rob head)からコミットされ、Renameの状態を更新します。
+実行を終えたUops（wb uops）は、ビジービットをクリアします。
+注：ディスパッチされたUOPは、同じROBの行にまとめて書き込まれ、
+メモリ上で連続して配置されるため、1台のPCで行全体を表現することができます。</span><a class="headerlink" href="#id13" title="Permalink to this image">¶</a></p>
+</div>
+<p>ROBは、概念的には、すべてのインフライト命令を順に追跡するリングバッファです。
+最も古い命令は <em>commit head</em> で指し示され、最新の命令は <em>rob tail</em> で追加されます。</p>
+<p>スーパースカラの <em>ディスパッチ</em> と <em>コミット</em> を容易にするために、ROBは <code class="docutils literal notranslate"><span class="pre">W</span></code> バンクを持つ円形バッファとして実装されています
+(ここで <code class="docutils literal notranslate"><span class="pre">W</span></code> はマシンの <em>dispatch</em> と <em>commit</em> の幅です <a class="footnote-reference brackets" href="#id11" id="id3">1</a> )。
+この構成を <a class="reference internal" href="#id2"><span class="std std-numref">Fig. 16</span></a> に示します。</p>
+<p><em>ディスパッチ</em> では、最大で <code class="docutils literal notranslate"><span class="pre">W</span></code> 個の命令が <span class="xref std std-term">フェッチパケット</span> から ROB の行に書き込まれ、
+各命令は行間の異なるバンクに書き込まれます。
+1つの <span class="xref std std-term">フェッチパケット</span> 内の命令はすべてメモリ内で連続している(アラインされている)ため、
+これにより1つのPCを <span class="xref std std-term">フェッチパケット</span> 全体に関連付けることができます
+(また、 <span class="xref std std-term">フェッチパケット</span> 内の命令の位置は、自身のPCに低次ビットを提供します)。
+これは、分岐コードがROB内にバブルを残すことを意味しますが、
+高価なコストが各ROB行で償却されるため、ROBへの命令の追加が非常に安くなります。</p>
+</div>
+<div class="section" id="id4">
+<h2>ROBの状態<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>各ROBのエントリには小さなステートが含まれます:</p>
+<ul class="simple">
+<li><p>エントリが有効か？</p></li>
+<li><p>エントリがBusy状態か？</p></li>
+<li><p>エントリで例外が発生しているか？</p></li>
+<li><p>分岐マスク(エントリ中のどの分岐命令がまだ投機中であるか？)</p></li>
+<li><p>リネーム状態(論理書き込みアドレスと古い書き込み物理レジスタ)</p></li>
+<li><p>浮動小数点ステータスアップデート</p></li>
+<li><p>他の様々なデータ(例えば統計のトラッキングに有益なもの)</p></li>
+</ul>
+<p>PCと分岐予測の情報は、行ごとに保存されます( <span class="xref std std-ref">PC Storage</span> 参照)。
+<strong>例外状態</strong> は、最も古い既知の例外命令のみを追跡します( <span class="xref std std-ref">Exception State</span> 参照)。</p>
+<div class="section" id="id5">
+<h3>例外の状態<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>ROBは、最も古い例外命令を追跡します。この命令がROBの先頭に到達すると、例外が発生します。</p>
+<p>各ROBエントリには、その命令に例外的な動作が発生したかどうかを示す1ビットのマークが付けられますが、
+追加の例外状態(不良仮想アドレスや例外原因など)は、既知の最古の例外命令についてのみ追跡されます。
+これは、エントリごとに保存しないことで、かなりのステートを節約できます。</p>
+</div>
+<div class="section" id="pc">
+<h3>PCの保存<a class="headerlink" href="#pc" title="Permalink to this headline">¶</a></h3>
+<p>ROBはすべてのインフライト命令のPCを知っていなければなりません。
+この情報は以下のような状況で使用されます。</p>
+<ul class="simple">
+<li><p>どのような命令でも例外が発生する可能性があり、その場合は”例外PC”(epc)を知る必要があります。</p></li>
+<li><p>分岐命令やジャンプ命令は、対象となる計算のために自分のPCを知る必要があります。</p></li>
+<li><p>ジャンプレジスタ命令は、自分自身のPCと、 <strong>プログラム中の次の命令</strong> のPCの両方を知っていなければなりません。</p></li>
+</ul>
+<p>この情報を保存するには非常にコストがかかります。
+分岐命令やジャンプ命令は、PCをパイプラインに渡す代わりに、 <strong>レジスタリード</strong> の段階でROBの”PCファイル”にアクセスし、
+<span class="xref std std-term">分岐ユニット</span> で使用します。
+2つの最適化が使われています。</p>
+<ul class="simple">
+<li><p>単一のPCのみがROBの行に保存されます。</p></li>
+<li><p>PCファイルは2つのバンクに分かれており、1つのリードポートで連続した2つのエントリーを同時に読み取ることができます(JR命令で使用)。</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id6">
+<h2>コミットステージ<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p><em>コミットヘッド</em> にある命令がビジーでなくなると(そしてそれは例外ではない)、
+その命令は <em>コミット</em> されるかもしれません。
+スーパースカラのコミットでは、ROBの行全体が*not busy*命令について分析されます(そのため、1サイクルでROBの行全体までコミットされる可能性があります)。
+ROBは、できるだけ早くリソースを解放するために、行ごとにできるだけ多くの命令を貪欲にコミットします。
+しかし、ROBは複数の行をまたいでコミット可能な命令を探すことは(現在は)ありません。</p>
+<p>ストアがコミットされて初めて、そのストアをメモリに送ることができます。
+スーパースカラでストアをコミットする場合、 <strong>Load/Store Unit (LSU)</strong> に「いくつのストアをコミットしてよいか」を伝えます。
+LSUはコミットされたストアを必要に応じてメモリに排出します。</p>
+<p>(レジスタに書き込む)命令がコミットすると、 <em>stale physical destination register</em> を解放します。
+その後、 <em>stale pdst</em> は自由になり、新しい命令に再割り当てされます。</p>
+</div>
+<div class="section" id="id7">
+<h2>例外とフラッシュ<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p>例外は、 <em>commit head</em> にある命令が除くときに処理されます。
+パイプラインはフラッシュされ、ROBは空になります。
+<strong>リネームマップテーブル</strong> をリセットして、真の、非投機的な <em>committed</em> 状態を表す必要があります。
+そして、 <span class="xref std std-term">フロントエンド</span> は適切なPCに指示されます。
+アーキテクチャ上の例外であれば、例外となる命令のPC( <em>例外ベクトル</em> と呼ばれます)がControl/Status Register(CSR)ファイルに送られます。
+マイクロアーキテクチャ的な例外(ロード/ストア順序の誤記など)の場合は、失敗した命令がリフェッチされ、
+新たに実行を開始することができます。</p>
+<div class="section" id="id8">
+<h3>パラメータ：ロールバックと1サイクルリセット<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<p>リネームマップテーブルをリセットする際の動作はパラメータ化可能です。
+最初のオプションは、ROBをサイクルごとに1行ずつロールバックしてリネーム状態を解除することです(これはMIPS R10kの動作です)。
+各命令に対して、 <em>stale物理的デスティネーション</em> レジスタは、その <em>論理的デスティネーション</em> 指定のためにマップテーブルに書き戻されます。</p>
+<p>より高速なシングルサイクルのリセットが可能です。
+これは、リネームテーブルの <em>committed</em> 状態を追跡する別のリネームスナップショットを使用することで実現されます。
+この <em>コミットマップテーブル</em> は命令がコミットすると更新されます。<a class="footnote-reference brackets" href="#id12" id="id9">2</a></p>
+</div>
+<div class="section" id="id10">
+<h3>例外要因<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<p>The RV64G ISA provides relatively few exception sources:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Load/Store Unit</dt><dd><ul class="simple">
+<li><p>page faults</p></li>
+</ul>
+</dd>
+<dt><a class="reference internal" href="terminology.html#term-Branch-Unit"><span class="xref std std-term">Branch Unit</span></a></dt><dd><ul class="simple">
+<li><p>misaligned fetches</p></li>
+</ul>
+</dd>
+<dt><strong>Decode</strong> Stage</dt><dd><ul class="simple">
+<li><p>all other exceptions and interrupts can be handled before the
+instruction is dispatched to the ROB</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p>なお、メモリ順序の推測エラーもLoad/Storeユニットから発生し、
+BOOMパイプラインでは例外として扱われます(実際にはパイプラインの「リトライ」が発生するだけです)。</p>
+</div>
+</div>
+<div class="section" id="point-of-no-return-pnr">
+<h2>Point of No Return (PNR)<a class="headerlink" href="#point-of-no-return-pnr" title="Permalink to this headline">¶</a></h2>
+<p>Point-of-no-returnヘッドは、ROBコミットヘッドの前を走り、
+誤判定や例外が発生する可能性のある次の命令をマークします。
+これには、未解決の分岐や翻訳されていないメモリ操作などが含まれます。
+このように、コミットヘッドの <em>前</em> とPNRヘッドの <em>後</em> にある命令は、
+たとえまだ書き戻されていなくても、 <em>非仕様</em> であることが保証されます。</p>
+<p>現在、PNRはRoCC命令にのみ使用されています。
+RoCCコプロセッサは、通常、命令をインオーダーで実行することを期待しており、
+投機ミスを許容しません。
+そのため、コプロセッサへの命令発行は、その命令がPNRヘッドを通過して、推測可能でなくなってから行うことになります。</p>
+<dl class="footnote brackets">
+<dt class="label" id="id11"><span class="brackets"><a class="fn-backref" href="#id3">1</a></span></dt>
+<dd><p>This design sets up the <em>dispatch</em> and <em>commit</em> widths of BOOM to be
+the same. However, that is not necessarily a fundamental constraint,
+and it would be possible to orthogonalize the <em>dispatch</em> and <em>commit</em>
+widths, just with more added control complexity.</p>
+</dd>
+<dt class="label" id="id12"><span class="brackets"><a class="fn-backref" href="#id9">2</a></span></dt>
+<dd><p>The tradeoff here is between longer latencies on exceptions versus an
+increase in area and wiring.</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="issue-units.html" class="btn btn-neutral float-right" title="命令発行ユニット" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="rename-stage.html" class="btn btn-neutral float-left" title="リネームステージ" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

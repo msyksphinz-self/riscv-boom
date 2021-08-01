@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>命令発行ユニット &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="レジスタファイルとバイパスネットワーク" href="reg-file-bypass-network.html" />
+    <link rel="prev" title="リオーダバッファ(ROB)とディスパッチステージ" href="reorder-buffer.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">命令発行ユニット</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">投機命令発行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">発行スロット</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">命令発行選択論理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">順序化されていない発行キュー</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">ウェイクアップ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>命令発行ユニット</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sections/issue-units.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="id1">
+<h1>命令発行ユニット<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p><strong>命令発行キュー</strong> は、まだ実行されていないディスパッチされた <span class="xref std std-term">Micro-Ops（UOP）</span> を保持します。
+<a class="reference internal" href="terminology.html#term-Micro-Op-UOP"><span class="xref std std-term">UOP</span></a> のすべてのオペランドの準備が整うと、発行スロットはその”要求”ビットを1に設定します。
+命令発行選択回路は、”request “信号をアサートしているスロットの発行を選択します。
+<span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> が発行されると、そのスロットはイシューキューから削除され、
+次にディスパッチされた命令のためのスペースが確保されます。</p>
+<p>BOOMでは、分割された命令発行キューを使用しています。
+特定のタイプの命令は、固有の発行キュー(整数、浮動小数点、メモリ)に入れられます。</p>
+<div class="section" id="id2">
+<h2>投機命令発行<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>まだサポートされていませんが、将来の設計では、パフォーマンスを向上させるために、
+<span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> を投機的に発行することが選択されるかもしれません
+(例えば、ロード命令がキャッシュにヒットすると推測し、
+ロードデータがバイパスネットワークで利用可能であると仮定して、
+依存性のある:term:<cite>UOPs&lt;Micro-Op (UOP)</cite> を発行するなど)。
+このようなシナリオでは、投機的に発行された <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> は、
+投機が解消されるまで発行キューは削除できません。
+投機的に発行された <span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> のハザードが発生した場合、
+投機されたウィンドウ内にあるすべての発行済み <span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> を殺して、
+発行キューから再送する必要があります。
+さらに高度な技術も用意されています。</p>
+</div>
+<div class="section" id="id3">
+<h2>発行スロット<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#single-issue-slot"><span class="std std-numref">Fig. 17</span></a> は、発行キューから1つの <strong>発行スロット</strong> を表示します。<a class="footnote-reference brackets" href="#id8" id="id4">1</a></p>
+<p>命令はイシュー・キューに <em>ディスパッチ</em> されます。
+ここからは、すべてのオペランドの準備が整うのを待ちます
+(“p “は*presence*ビットの略で、オペランドがレジスタファイルに*存在していることを示します)。。</p>
+<p>準備が整うと、発行スロットは “request “信号をアサートして、発行されるのを待ちます。</p>
+</div>
+<div class="section" id="id5">
+<h2>命令発行選択論理<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-default" id="id9">
+<span id="single-issue-slot"></span><img alt="Single Issue Slot" src="../_images/issue_slot.png" />
+<p class="caption"><span class="caption-number">Fig. 17 </span><span class="caption-text">A single issue slot from the Issue Queue.</span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
+</div>
+<p>各命令発行選択論理ポートは、発行キューの中で最初に利用可能な <span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> を選択する静的優先順位エンコーダです。
+各ポートは、そのポートが処理できる:term:<cite>UOP&lt;Micro-Op (UOP)</cite> のみをスケジュールします
+(例えば、浮動小数点の <span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> は、浮動小数点ユニットを管理するポートにのみスケジュールされます)。
+これにより、お互いに同じ <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> をスケジューリングできるポートに対して、
+カスケード式のプライオリティ・エンコーダーが作成されます。</p>
+<p><strong>機能ユニット</strong> が利用できない場合、その機能ユニットは利用可能な信号を解除し、
+その機能ユニットには命令が発行されません(例: パイプライン化されていない除算器)。</p>
+</div>
+<div class="section" id="id6">
+<h2>順序化されていない発行キュー<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p>BOOMでは2つのスケジューリングポリシが使用可能です。</p>
+<p>1つ目は、MIPS R10KスタイルのUn-ordered Issue Queueです。
+ディスパッチされた命令は、最初に利用可能な命令キュースロットに配置され、
+その命令が <em>発行</em> されるまでそこに留まります。
+これは特に、予測できない分岐が優先度の低いスロットに置かれ、
+ROBがいっぱいになって発行ウィンドウが空になるまで発行できないようなシナリオでは、
+病的なほどパフォーマンスが低下する可能性があります。
+分岐に続く命令は、分岐に <em>暗黙のうちに</em> 依存しているだけなので、
+ROBが満杯になること以外に、分岐を早く発行できる強制的な機能はありません。</p>
+<p>順序付けされた発行キュー</p>
+<p>2番目に利用可能なポリシーは、年齢順の発行キューです。
+ディスパッチされた命令は、発行キューの一番下(優先順位が一番低い)に置かれます。
+サイクルごとに、すべての命令が上にシフトされます(イシューキューは”折りたたみ式キュー”です)。
+したがって、最も古い命令が最も高い発行優先度を持つことになります。
+これにより、古い分岐や古いロードをできるだけ早くスケジューリングすることでパフォーマンスが向上しますが、
+サイクルごとにすべてのイシューキューのスロットが読み書きされる可能性があるため、潜在的なエネルギーペナルティが発生します。</p>
+</div>
+<div class="section" id="id7">
+<h2>ウェイクアップ<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p>BOOMのウェイクアップには、 <em>fast</em> ウェイクアップと <em>slow</em> ウェイクアップ(long latency wakeupともいう)の2種類があります。
+ALU <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> はバイパスネットワークを介してライトバックデータを送ることができるため、
+発行されたALU <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> は、発行された時点でそのウェイクアップをIssue Queueにブロードキャストします。</p>
+<p>しかし、浮動小数点演算、ロード、可変レイテンシー演算はバイパスネットワークを経由せず、
+代わりにライトバックステージでレジスタファイルポートからウェイクアップ信号が送られます。</p>
+<dl class="footnote brackets">
+<dt class="label" id="id8"><span class="brackets"><a class="fn-backref" href="#id4">1</a></span></dt>
+<dd><p>Conceptually, a bus is shown for implementing the driving of the
+signals sent to the <strong>Register Read</strong> Stage. In reality BOOM actually
+uses muxes.</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="reg-file-bypass-network.html" class="btn btn-neutral float-right" title="レジスタファイルとバイパスネットワーク" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="reorder-buffer.html" class="btn btn-neutral float-left" title="リオーダバッファ(ROB)とディスパッチステージ" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

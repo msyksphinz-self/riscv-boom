@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>分岐予測 &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="The Next-Line Predictor (NLP)" href="nl-predictor.html" />
+    <link rel="prev" title="命令フェッチ" href="../instruction-fetch-stage.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">分岐予測</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nl-predictor.html">The Next-Line Predictor (NLP)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html">The Backing Predictor (BPD)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>分岐予測</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/sections/branch-prediction/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="id1">
+<h1>分岐予測<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="figure align-default" id="id4">
+<span id="front-end-bpu"></span><img alt="BOOM Front-end" src="../../_images/front-end.svg" /><p class="caption"><span class="caption-number">Fig. 6 </span><span class="caption-text">The BOOM Front-end</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<p>この章では、BOOMがどのように分岐を予測し、その予測を解決するかについて説明します。</p>
+<p>BOOMは、高速な <a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">Next-Line Predictor (NLP)</span></a> と、より遅いが複雑な <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">Backing Predictor (BPD)</span></a> という2つのレベルの分岐予測を使用します <a class="footnote-reference brackets" href="#id3" id="id2">1</a> 。
+この場合、 <a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">NLP</span></a> は、Branch Target Bufferで、 <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> は、GShare Predictorのようなより複雑な構造です。</p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Branch Prediction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="nl-predictor.html">The Next-Line Predictor (NLP)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nl-predictor.html#nlp">NLP予測</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nl-predictor.html#id1">NLPの更新</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="backing-predictor.html">The Backing Predictor (BPD)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#id2">分岐予測の生成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#id3">ジャンプとジャンプレジスタ命令</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#backing-predictor">Backing Predictorの更新</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#ghr">グローバルヒストリレジスタ(GHR)の管理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#ftq">分岐予測のためのフェッチターゲットキュー(FTQ)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#id11">リネームスナップショットステート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#id12">抽象分岐予測器クラス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#id13">グローバルヒストリ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#id15">2ビットカウンタテーブル</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#the-gshare-predictor">The GShare Predictor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#the-tage-predictor">The TAGE Predictor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html#other-predictors">Other Predictors</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
+<dd><p>残念なことに、異なるタイプやレベルの分岐予測器を何と呼ぶかについて、文献の用語が少し混乱しています。
+文献には、”マイクロBTB”と”BTB”、”NLP”と”BHT”、”キャッシュラインプレディクター”と”オーバーライドプレディクター”など、さまざまな構造に関する記述があります。
+Rocketコアは独自の予測器を”BTB”と呼んでいますが、BOOMでは <a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">Next-Line Predictor (NLP)</span></a> と呼び、
+「次の行」をフェッチするためのシングルサイクル予測を提供する組み合わせ予測器であることを示しています。
+また、Rocket BTBは単なる”ブランチターゲットバッファ”構造よりもはるかに複雑な構造を含んでいます。
+同様に、 <a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">Backing Predictor (BPD)`という名称は、内部設計を過度に説明しないようにするために選ばれました
+(それは単純なBHTなのか？タグ付けされているのか？ `NLP</span></a> をオーバーライドするのか？)
+「もっといい名前があるよ！」という方は、お気軽にご連絡ください。</p>
+</dd>
+</dl>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="nl-predictor.html" class="btn btn-neutral float-right" title="The Next-Line Predictor (NLP)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../instruction-fetch-stage.html" class="btn btn-neutral float-left" title="命令フェッチ" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

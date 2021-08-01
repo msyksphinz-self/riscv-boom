@@ -1,0 +1,349 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>命令フェッチ &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="分岐予測" href="branch-prediction/index.html" />
+    <link rel="prev" title="Rocket Chip SoCジェネレータ" href="intro-overview/rocket-chip.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">命令フェッチ</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rocket">Rocketコア 命令キャッシュ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#compressed">Compressed命令のフェッチ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">フェッチバッファ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">フェッチターゲットキュー</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>命令フェッチ</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sections/instruction-fetch-stage.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="id1">
+<h1>命令フェッチ<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="figure align-default" id="id7">
+<span id="front-end"></span><img alt="BOOM :term:`Front-end`" src="../_images/front-end.svg" /><p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">The BOOM <a class="reference internal" href="terminology.html#term-Front-end"><span class="xref std std-term">Front-end</span></a></span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+</div>
+<p>BOOM は、Rocket コアが独自の <span class="xref std std-term">フロントエンド</span> をインスタンス化するのと同様に、独自の <span class="xref std std-term">フロントエンド</span> をインスタンス化します。
+この <span class="xref std std-term">フロントエンド</span> は、複数のフェッチサイクル (<strong>F0</strong>、<strong>F1</strong>…) で命令ストリームをリダイレクトするために、
+フェッチステージを通して命令をフェッチし、予測を行います。
+BOOMの <span class="xref std std-term">バックエンド</span> (実行パイプライン)で予測の間違いが検出された場合や、
+BOOM自身の予測器の一つがパイプラインを別の方向に向けたいと思った場合、
+<span class="xref std std-term">フロントエンド</span> にリクエストが送られ、新しい命令パスに沿ってフェッチを開始します。
+分岐予測がフェッチステージのパイプラインにどのように適合するかについての詳細は、 <a class="reference internal" href="branch-prediction/index.html#id1"><span class="std std-ref">分岐予測</span></a> を参照してください。</p>
+<p>スーパースカラフェッチがサポートされているので、 <span class="xref std std-term">フロントエンド</span> は命令メモリから命令の <span class="xref std std-term">フェッチパケット</span> を取得し、
+<span class="xref std std-term">フェッチバッファ</span> に入れてパイプラインの残りの部分に渡します。
+フェッチパケットには、有効マスク(パケット内のどの命令が有効か)や、パイプラインの後半で使用される分岐予測情報など、
+他のメタデータも含まれています。
+さらに、PCと分岐予測情報は、パイプラインの残りの部分のためにこれらの情報を保持する <span class="xref std std-term">フェッチターゲットキュー</span> の中に格納されます。</p>
+<div class="section" id="rocket">
+<h2>Rocketコア 命令キャッシュ<a class="headerlink" href="#rocket" title="Permalink to this headline">¶</a></h2>
+<p>BOOM は、Rocket プロセッサのソースコードから取得した命令キャッシュをインスタンス化します。
+命令キャッシュは、仮想的にインデックスを付け、
+物理アドレスにタグを付けたセットアソシアティブキャッシュです。</p>
+<p>電力を節約するために、命令キャッシュは固定数のバイト(アラインド)を読み出し、
+命令ビットをレジスタに格納します。
+さらなる命令のフェッチは、このレジスタで管理できます。
+命令キャッシュは、フェッチレジスタが使い果たされたとき(または、分岐予測によってPCが別の場所に移動したとき)にのみ、再び起動されます。</p>
+<p>また、スーパースカラ・フェッチ・アドレスに対して(現在では)アンアラインでのフェッチもサポートしていません。<a class="footnote-reference brackets" href="#id5" id="id2">1</a></p>
+<p>命令キャッシュは(現在は)it-under-missをサポートしていません。
+命令キャッシュにミスが発生した場合、ミスが処理されるまで命令キャッシュはそれ以上のリクエストを受け付けません。
+これは、パイプラインがブランチの分岐予測失敗を検出し、
+正しいパスに沿ってフェッチを開始するために命令キャッシュをリダイレクトしたい場合には理想的ではありません。</p>
+</div>
+<div class="section" id="compressed">
+<h2>Compressed命令のフェッチ<a class="headerlink" href="#compressed" title="Permalink to this headline">¶</a></h2>
+<p>このセクションでは、 <a class="reference external" href="https://riscv.org/specifications/">RISC-V Compressed ISA extension</a> が BOOM にどのように実装されたかを説明します。
+Compressed ISA 拡張 (RVC)は、一般的な命令をより小さな16ビットのエンコーディングにすることで、
+スタティックおよびダイナミックなコードサイズを小さくすることができます。
+“RVC “には、マイクロアーキテクトにとって特に興味深いいくつかの機能が搭載されています。</p>
+<ul class="simple">
+<li><p>32ビットの命令はアライメントの制約が無く、16バイトの境界から開始することができる。</p></li>
+<li><p>全ての16ビット命令はより長い32ビットの命令にマッピングすることができる。</p></li>
+</ul>
+<p>BOOM は <span class="xref std std-term">フロントエンド</span> ステージにおいて、命令キャッシュから <span class="xref std std-term">フェッチパケット</span> を取得し、
+分岐予測のために命令を素早くデコードして、 <span class="xref std std-term">フェッチパケット</span> を <span class="xref std std-term">フェッチバッファ</span> にプッシュします。
+しかし、これを行うには、管理すべき特殊な問題が発生します。</p>
+<ul class="simple">
+<li><p>デコードの複雑さが増す(オペランドが位置が変わるようになったため)。</p></li>
+<li><p>命令が <em>どこから</em> 始まるかを見つける必要がある。</p></li>
+<li><p>コードベース全体での <code class="docutils literal notranslate"><span class="pre">+4</span></code> の仮定の削除(特に分岐処理で)。</p></li>
+<li><p>アンアラインド命令、特にキャッシュラインや仮想ページからの実行。</p></li>
+</ul>
+<p>最後の点については、命令のすべての部分をフェッチするのに複数のサイクルを要することがあるため、
+<span class="xref std std-term">フェッチユニット</span> に追加の “statefulness” が必要になります。</p>
+<p>以下では、命令の寿命を記述することで、BOOMにおけるRVCの実装を説明します。</p>
+<ul class="simple">
+<li><p><span class="xref std std-term">フロントエンド</span> は <a class="reference internal" href="terminology.html#term-Fetch-Width"><span class="xref std std-term">fetchWidth</span></a> という 16ビット幅の <span class="xref std std-term">フェッチパケット</span> を返します。
+これは、BOOMの <span class="xref std std-term">フロントエンド</span> で本質的にサポートされていました。</p></li>
+<li><p><strong>F3</strong> では、 <span class="xref std std-term">フェッチパケット</span> が命令キャッシュのレスポンスキューからデキューされ、
+<span class="xref std std-term">フェッチバッファ</span> にエンキューされるサイクルにおいて、ステートフルネスを維持します。</p></li>
+<li><p><strong>F3</strong> は、最後の <span class="xref std std-term">フェッチパケット</span> の末尾の16ビット、PC、および命令境界を追跡します。
+これらのビットは、現在の <span class="xref std std-term">フェッチパケット</span> と結合され、 <a class="reference internal" href="terminology.html#term-Fetch-Width"><span class="xref std std-term">fetchWidth</span></a> に拡張され、
+<span class="xref std std-term">フェッチバッファ</span> にエンキューされます。
+プリデコードは、この <span class="xref std std-term">フェッチパケット</span> 内のすべての命令の開始アドレスを決定し、
+<span class="xref std std-term">フェッチパケット</span> を <span class="xref std std-term">フェッチバッファ</span> 用にマスクします。</p></li>
+<li><p><span class="xref std std-term">フェッチバッファ</span> は、メモリに格納する際に、無効な命令やミスアラインメントの命令を圧縮します。</p></li>
+</ul>
+<p>次のセクションでは、その他の実装の詳細について説明します。</p>
+<ul class="simple">
+<li><p>困難な問題は、 <span class="xref std std-term">フェッチ境界</span> を越える命令を扱うことです。
+このような命令は、その上位16ビットを含む <span class="xref std std-term">フェッチパケット</span> に属するものとして追跡します。
+これらの命令のPCを決定する際には、最初に <span class="xref std std-term">フェッチ境界</span> を越えてミスアラインされたすべての命令を追跡することで、
+注意しなければなりません。</p></li>
+<li><p>また、パイプラインは、命令が元々16ビットだったのか32ビットだったのかを追跡し、<code class="docutils literal notranslate"><span class="pre">PC+4</span></code> や <code class="docutils literal notranslate"><span class="pre">PC+2</span></code> を計算する必要があります。</p></li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2>フェッチバッファ<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>命令キャッシュから来る <span class="xref std std-term">フェッチパケット</span> は <span class="xref std std-term">フェッチバッファ</span> に入れられます。
+フェッチバッファは、命令フェッチ(フロントエンド)をバックエンドの実行パイプラインから切り離すのに役立ちます。</p>
+<p><span class="xref std std-term">フェッチバッファ</span> はパラメータ化が可能です。エントリの数を変更したり、
+バッファを「フロースルー」キュー[2]_ として実装するかどうかを切り替えたりすることができます。</p>
+</div>
+<div class="section" id="id4">
+<h2>フェッチターゲットキュー<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p><span class="xref std std-term">フェッチターゲットキュー</span> は、命令キャッシュから受け取った PC と、そのアドレスに関連する分岐予測情報を保持するキューです。
+この情報は、パイプラインが <span class="xref std std-term">Micro-Ops (UOPs)</span> を実行する際に参照するために保持されます。
+これは、命令がコミットされるとROBによってデキューされ、パイプラインのリダイレクション/分岐予測失敗時に更新されます。</p>
+<dl class="footnote brackets">
+<dt class="label" id="id5"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
+<dd><p>この制約は、キャッシュラインがメモリバンクの1行に格納されるのではなく、
+外部インタフェースからのリフィルサイズに合わせて1つのバンクにストライプ状に格納されていることに起因します。
+アンアラインドで取得するには、キャッシュラインの連続したチャンクに同時にアクセスできるように命令キャッシュをバンク化するなど、
+基本的な実装を変更する必要があります。</p>
+</dd>
+<dt class="label" id="id6"><span class="brackets">2</span></dt>
+<dd><p>フロースルーキューは、キューが空でコンシューマが要求している場合に、
+キューイングされているエントリを直ちにデキューイングすることができます(パケットは瞬時に「フロースルー」されます)。</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="branch-prediction/index.html" class="btn btn-neutral float-right" title="分岐予測" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="intro-overview/rocket-chip.html" class="btn btn-neutral float-left" title="Rocket Chip SoCジェネレータ" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

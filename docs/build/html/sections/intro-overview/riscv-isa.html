@@ -1,0 +1,318 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>RISC-V命令セットアーキテクチャ &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Rocket Chip SoCジェネレータ" href="rocket-chip.html" />
+    <link rel="prev" title="ハードウェア構築言語Chisel" href="chisel.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>RISC-V命令セットアーキテクチャ</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/sections/intro-overview/riscv-isa.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="risc-v">
+<h1>RISC-V命令セットアーキテクチャ<a class="headerlink" href="#risc-v" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="riscv.org">RISC-V ISA</a> は、広く採用されているオープンソースのISAで、
+さまざまなアプリケーションに適しています。
+BOOM は RISC-V ISA の RV64GCバリエーション (別称 IMAFDC) <a class="footnote-reference brackets" href="#id2" id="id1">1</a> を実装しています。
+これには，MAFDC 拡張と特権的仕様(乗算/除算、AMO、ロード・リザーブ/ストア・コンディショナル、
+単精度および倍 精度の IEEE 754-2008 浮動小数点)が含まれています．</p>
+<p>RISC-Vには、以下のような特徴があり、高性能な設計に対応しやすくなっています。</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>リラックスメモリモデル</strong></dt><dd><ul>
+<li><p>これにより、ロードが他のロードをスヌープする必要も、コヒーレンス・トラフィックがLSUをスヌープする必要もなく、
+<strong>Load/Store Unit (LSU)</strong> が大幅に簡素化されます(シーケンシャル・コンシステンシーでは必要)。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>正確な浮動小数点(FP) 例外フラグ</strong></dt><dd><ul>
+<li><p>FPステータスレジスタのリネームを行う必要はありませんし、
+FP命令自体が例外を発生させることもありません．</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>整数命令の副作用無し</strong></dt><dd><ul>
+<li><p>すべての整数ALU演算は、書き込みレジスタの書き込み以外には、副作用がありません。
+これにより、追加のコンディション・ステートのリネームの必要がなくなります。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>CMOVとプレディケーション命令の不採用</strong></dt><dd><ul>
+<li><p>プレディケーションは、小規模な設計であれば分岐予測器の複雑さを軽減することができますが、
+整数演算用に3つ目の読み出しポートを追加するなど、
+アウトオブオーダーパイプラインを大幅に複雑化させます。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>暗黙的なレジスタ指定を含まない</strong></dt><dd><ul>
+<li><p>JALでさえ、明示的にレジスタを指定する必要があります。これにより、リネームロジックがシンプルになり、
+リネームテーブルにアクセスする前にまず命令を知る必要がなくなったり、
+命令デコードをクリティカルパスから外すためにポートを増やすことがなくなります。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>rs1, rs2, rs3, rdレジスタのフィールド位置は常に同一</strong></dt><dd><ul>
+<li><p>これによりデコードとリネームを同時に実行することができます。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>RISC-V ISAに関するより詳細な情報は <a class="reference external" href="http://riscv.org">http://riscv.org</a> より参照できます。</p>
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>現在、BOOMは “V”拡張を実装していません。</p>
+</dd>
+</dl>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="rocket-chip.html" class="btn btn-neutral float-right" title="Rocket Chip SoCジェネレータ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="chisel.html" class="btn btn-neutral float-left" title="ハードウェア構築言語Chisel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

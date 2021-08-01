@@ -1,0 +1,698 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The Backing Predictor (BPD) &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="デコードステージ" href="../decode-stage.html" />
+    <link rel="prev" title="The Next-Line Predictor (NLP)" href="nl-predictor.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">分岐予測</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="nl-predictor.html">The Next-Line Predictor (NLP)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">The Backing Predictor (BPD)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">分岐予測の生成</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">ジャンプとジャンプレジスタ命令</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#backing-predictor">Backing Predictorの更新</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ghr">グローバルヒストリレジスタ(GHR)の管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ftq">分岐予測のためのフェッチターゲットキュー(FTQ)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">リネームスナップショットステート</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">抽象分岐予測器クラス</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">グローバルヒストリ</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id14">オペレーティングシステムを意識したグローバルヒストリ</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">2ビットカウンタテーブル</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-gshare-predictor">The GShare Predictor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-tage-predictor">The TAGE Predictor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tage-global-history-and-the-circular-shift-registers-csrs-15">TAGE Global History and the Circular Shift Registers (CSRs) </a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usefulness-counters-u-bits">Usefulness counters (u-bits)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tage-snapshot-state">TAGE Snapshot State</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#other-predictors">Other Predictors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-base-only-predictor">The Base Only Predictor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-null-predictor">The Null Predictor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-random-predictor">The Random Predictor</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">分岐予測</a> &raquo;</li>
+        
+      <li>The Backing Predictor (BPD)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/sections/branch-prediction/backing-predictor.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="the-backing-predictor-bpd">
+<h1>The Backing Predictor (BPD)<a class="headerlink" href="#the-backing-predictor-bpd" title="Permalink to this headline">¶</a></h1>
+<p><span class="xref std std-term">Next Line Predictor (NLP)</span> がうまく予測しているときは、プロセッサの <span class="xref std std-term">バックエンド</span> に実行すべき命令の切れ目のないストリームが提供されます。
+NLP (Next-Line Predictor)は、1サイクルの高速な予測を行うことができますが、
+コストが高く(面積と電力の両方の観点から)、非常に小さく(数十本の分岐しか記憶できない)、
+非常にシンプルです( <a class="reference internal" href="../terminology.html#term-Bi-Modal-Table-BIM"><span class="xref std std-term">Bi-Modal Table (BIM)</span></a> のヒステリシスビットは非常に複雑で長い履歴パターンを学習することができません)。</p>
+<p>より複雑な分岐の動作を捉えるために、BOOMは <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">Backing Predictor (BPD)</span></a> をサポートしています。</p>
+<p><span class="xref std std-term">BPD</span> の目標は、(願わくば)高い面積密度で非常に高い精度を提供することです。
+<a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> は分岐成立/不成立の情報のみを生成します; つまりどの命令が分岐命令で
+どこが分岐先であるかの情報を得るためには、他のエージェントに依存することになります。
+<a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> は、この情報をBTBから得るか、または命令キャッシュから命令がフェッチされるのを待って、
+自分でデコードすることができます。
+これにより、PCタグと分岐ターゲットを <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> 内に保存する必要がなくなります <a class="footnote-reference brackets" href="#id18" id="id1">7</a>。</p>
+<p><a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> は、<strong>Fetch</strong> ステージを通してアクセスされ、
+命令キャッシュアクセスやBTBと並行してアクセスされます( <a class="reference internal" href="#front-end-bpu-bpd"><span class="std std-numref">Fig. 8</span></a> 参照)。
+これにより、 <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> をシーケンシャルメモリ(フリップフロップの代わりに SRAM)に格納することができます。
+いくつかの巧妙なアーキテクチャにより、 <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> をシングルポートの SRAM に格納して、望ましい密度を実現することができます。</p>
+<div class="figure align-default" id="id28">
+<span id="front-end-bpu-bpd"></span><img alt="BOOM :term:`Front-end`" src="../../_images/front-end.svg" /><p class="caption"><span class="caption-number">Fig. 8 </span><span class="caption-text">BOOMの <span class="xref std std-term">フロントエンド</span> . ここでは、図の下の部分にBTBとBranch Predictorが見えます。
+命令キャッシュから戻ってきた命令はすぐにデコードされます。
+BTBや <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">Backing Predictor (BPD)</span></a> から取られたと予測されるブランチは、 <strong>F4</strong> ステージから <a class="reference internal" href="../terminology.html#term-Front-end"><span class="xref std std-term">Front-end</span></a> にリダイレクトされます。
+予測スナップショットとメタデータは、 <span class="xref std std-term">Branch Rename Snapshots</span> (予測ミスの後に予測器を修正するため)と
+<a class="reference internal" href="../terminology.html#term-Fetch-Target-Queue-FTQ"><span class="xref std std-term">Fetch Target Queue (FTQ)</span></a> ( <strong>Commit</strong> ステージで予測器を更新するため)に保存されます。</span><a class="headerlink" href="#id28" title="Permalink to this image">¶</a></p>
+</div>
+<div class="section" id="id2">
+<h2>分岐予測の生成<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>予測を行う際、 <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> は以下のものを提供しなければなりません。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>予測を行ったか？</p></li>
+<li><p>分岐成立/不成立の予測のビットベクタ</p></li>
+</ul>
+</div></blockquote>
+<p>最初の箇条書きにあるように、 <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> は、
+予測を行わない場合があります。
+これは、予測者がタグを使ってその予測が有効かどうかを通知したり、構造的な危険性があって予測ができない場合があるためです。</p>
+<p><a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> は、分岐成立/不成立の予測のビットベクタを提供します。
+ビットベクタのサイズは、パイプラインの <a class="reference internal" href="../terminology.html#term-Fetch-Width"><span class="xref std std-term">Fetch Width</span></a> と一致します ( <a class="reference internal" href="../terminology.html#term-Fetch-Packet"><span class="xref std std-term">Fetch Packet</span></a> の各命令に対して1ビット)。
+後の**Fetch**ステージでは、 <a class="reference internal" href="../terminology.html#term-Fetch-Packet"><span class="xref std std-term">Fetch Packet</span></a> 内の命令をデコードし、ブランチターゲットを計算し、
+<a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> の予測ビットベクタと連動して、 <a class="reference internal" href="../terminology.html#term-Front-end"><span class="xref std std-term">Front-end</span></a> リダイレクトを行うべきかどうかを決定します。</p>
+</div>
+<div class="section" id="id3">
+<h2>ジャンプとジャンプレジスタ命令<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p><span class="xref std std-term">BPD</span> とは別に取り扱われます。<a class="footnote-reference brackets" href="#id19" id="id4">8</a></p>
+<p><a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">NLP</span></a> は、「分岐の成立した」命令のPCとターゲットPCを学習するので、
+ジャンプやジャンプレジスタ命令を予測することができます。</p>
+<p>もし <a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">NLP</span></a> がJAL命令を予測しなかった場合、
+パイプラインは <strong>F4</strong> で <span class="xref std std-term">フロントエンド</span> をリダイレクトします( <a class="reference internal" href="../instruction-fetch-stage.html#front-end"><span class="std std-numref">Fig. 5</span></a> 参照)。<a class="footnote-reference brackets" href="#id20" id="id5">9</a></p>
+<p><a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">NLP</span></a> で予測されなかったジャンプレジスター命令は、
+予測されないままパイプラインに送られます。
+JALR命令では、レジスタファイルを読み込んでジャンプ先を推測する必要があるため、
+<a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">NLP</span></a> が予測を行わなかった場合には、何もできません。</p>
+</div>
+<div class="section" id="backing-predictor">
+<h2>Backing Predictorの更新<a class="headerlink" href="#backing-predictor" title="Permalink to this headline">¶</a></h2>
+<p>一般的に、 <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> は <strong>Commit</strong> ステージで更新されます。
+これにより、 <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> が誤ったパスの情報で汚染されるのを防ぐことができます。<a class="footnote-reference brackets" href="#id21" id="id6">10</a>
+ただし、 <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> はグローバルヒストリを利用しているため、 <a class="reference internal" href="../terminology.html#term-Front-end"><span class="xref std std-term">Front-end</span></a> がリダイレクトされるたびに、
+このヒストリーをリセットする必要があります。
+したがって、 <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> は、<strong>Fetch</strong> 段階で発生した投機的な更新をリセットするために、
+予測誤りが発生した <strong>Execute</strong> 中にも(部分的に)更新されなければなりません。</p>
+<p>予測を行う際、 <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> は「応答情報パケット」をパイプラインに渡します。
+この「情報パケット」は、コミット時まで <a class="reference internal" href="../terminology.html#term-Fetch-Target-Queue-FTQ"><span class="xref std std-term">Fetch Target Queue (FTQ)</span></a> に格納されます。<a class="footnote-reference brackets" href="#id22" id="id7">11</a>
+「情報パケット」に対応するすべての命令がコミットされると、「情報パケット」は(最終的な分岐の結果とともに) <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> に設定され、
+<a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> が更新されます。<span class="xref std std-ref">The Fetch Target Queue (FTQ) for Predictions</span> は <a class="reference internal" href="../terminology.html#term-Fetch-Target-Queue-FTQ"><span class="xref std std-term">FTQ</span></a> を対象としており、
+<strong>Commit</strong> の際に予測器を更新するために必要なスナップショット情報を扱います。
+<span class="xref std std-ref">Rename Snapshot State</span> は <span class="xref std std-term">Branch Rename Snapshots</span> を対象としています。
+これは <strong>Execute</strong> ステージでの誤判定の際に予測子を更新するために必要なスナップショット情報を処理します。</p>
+</div>
+<div class="section" id="ghr">
+<h2>グローバルヒストリレジスタ(GHR)の管理<a class="headerlink" href="#ghr" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="../terminology.html#term-Global-History-Register-GHR"><span class="xref std std-term">Global History Register (GHR)</span></a> は、分岐予測器の重要な部分です。
+これは、前の <code class="docutils literal notranslate"><span class="pre">N</span></code> 個の分岐の結果を含んでいます(ここで、Nは <a class="reference internal" href="../terminology.html#term-Global-History-Register-GHR"><span class="xref std std-term">GHR</span></a> のサイズです)。<a class="footnote-reference brackets" href="#id23" id="id8">12</a></p>
+<p>ブランチ <code class="docutils literal notranslate"><span class="pre">i</span></code> をフェッチする際には、正確な予測ができるように、前の <code class="docutils literal notranslate"><span class="pre">i-N</span></code> 個のブランチの方向性が利用できることが重要です。
+<strong>コミット</strong> 段階まで待って <a class="reference internal" href="../terminology.html#term-Global-History-Register-GHR"><span class="xref std std-term">GHR</span></a> を更新するのでは遅すぎます(何十ものブランチが飛んでいるのに反映されていません！)。
+したがって、分岐がフェッチされて予測されると、 <a class="reference internal" href="../terminology.html#term-Global-History-Register-GHR"><span class="xref std std-term">GHR</span></a> を <em>投機的に</em> 更新しなければなりません。</p>
+<p>予測ミスが発生した場合は、 <span class="xref std std-term">GHR</span> をリセットして、
+実際の履歴を反映するように更新しなければなりません。
+つまり、各分岐命令(より正確には、各 <span class="xref std std-term">フェッチパケット</span> )は、
+予測が外れた場合に備えて <a class="reference internal" href="../terminology.html#term-Global-History-Register-GHR"><span class="xref std std-term">GHR</span></a> をスナップショットを取らなければなりません。<a class="footnote-reference brackets" href="#id24" id="id9">13</a></p>
+<p>最後にもう1つ、例外的なパイプラインの動作があります。
+各分岐には <a class="reference internal" href="../terminology.html#term-Global-History-Register-GHR"><span class="xref std std-term">GHR</span></a> のスナップショットが含まれていますが、
+どの命令も <span class="xref std std-term">フロントエンド</span> リダイレクトの原因となる例外を発生させる可能性があります。
+このようなイベントは、 <a class="reference internal" href="../terminology.html#term-Global-History-Register-GHR"><span class="xref std std-term">GHR</span></a> が破損する原因となります。
+例外については、これは許容できると思われるかもしれません - 例外はまれであるべきで、
+トラップハンドラは(ユーザーコードの観点から)いずれにしても <a class="reference internal" href="../terminology.html#term-Global-History-Register-GHR"><span class="xref std std-term">GHR</span></a> の汚染を引き起こします。
+しかし、例外的なイベントとして”パイプライン再実行”があります。
+これは、ある命令がパイプライン・フラッシュを引き起こし、
+その命令がリフェッチされて再実行されるイベントです。<a class="footnote-reference brackets" href="#id25" id="id10">14</a>
+このため、 <a class="reference internal" href="../terminology.html#term-Global-History-Register-GHR"><span class="xref std std-term">GHR</span></a> の <em>コミットコピー</em> は <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> によっても維持され、
+あらゆる種類のパイプライン・フラッシュ・イベントでリセットされます。</p>
+</div>
+<div class="section" id="ftq">
+<h2>分岐予測のためのフェッチターゲットキュー(FTQ)<a class="headerlink" href="#ftq" title="Permalink to this headline">¶</a></h2>
+<p>リオーダバッファ( <span class="xref std std-ref">リオーダバッファ (ROB) とディスパッチステージ</span> 参照)は、すべてのインフライト命令の記録を保持します。
+同様に、 <a class="reference internal" href="../terminology.html#term-Fetch-Target-Queue-FTQ"><span class="xref std std-term">FTQ</span></a> は、すべてのインフライトの分岐予測とPC情報の記録を保持します。
+これらの2つの構造は、 <a class="reference internal" href="../terminology.html#term-Fetch-Target-Queue-FTQ"><span class="xref std std-term">FTQ</span></a> のエントリが非常に高価であり、
+すべてのROBエントリに分岐命令が含まれるわけではないため、切り離されています。
+また、ROBのすべてのエントリに分岐命令が含まれているわけではありません。
+分岐命令は6つの命令のうちおよそ1つだけなので、 <a class="reference internal" href="../terminology.html#term-Fetch-Target-Queue-FTQ"><span class="xref std std-term">FTQ</span></a> はROBよりもエントリ数を少なくして、
+さらなる節約を図ることができます。</p>
+<p>各 <a class="reference internal" href="../terminology.html#term-Fetch-Target-Queue-FTQ"><span class="xref std std-term">FTQ</span></a> エントリーは、1 <strong>フェッチ</strong> サイクルに対応します。
+予測を行うたびに、分岐予測器は後で更新を行う際に必要となるデータをパックアップします。
+例えば、分岐予測器は、予測がどの <em>インデックス</em> から来たかを覚えておき、
+後でそのインデックスのカウンターを更新できるようにします。
+このデータは、 <a class="reference internal" href="../terminology.html#term-Fetch-Target-Queue-FTQ"><span class="xref std std-term">FTQ</span></a> に格納されます。</p>
+<p>term:<cite>Fetch Packet</cite> の最後の命令がコミットされると、
+<a class="reference internal" href="../terminology.html#term-Fetch-Target-Queue-FTQ"><span class="xref std std-term">FTQ</span></a> のエントリは解放され、
+分岐予測器に戻されます。
+<a class="reference internal" href="../terminology.html#term-Fetch-Target-Queue-FTQ"><span class="xref std std-term">FTQ</span></a> エントリに格納されたデータを使用して、
+分岐予測器はその予測状態に対して任意の所望の更新を行うことができます。</p>
+<p><strong>コミット</strong> の後に分岐予測器を更新する理由はいくつかあります。
+予測器が <em>正しい</em> 情報だけを学習することは非常に重要です。
+データキャッシュでは、間違ったパスの実行からフェッチされたメモリは、
+後の実行が別のパスになったときに最終的に役に立つかもしれません。
+しかし、分岐予測器では、間違ったパスの更新は、純粋な汚染である情報をエンコードします。
+つまり、有用ではなく、決して有用ではない情報を保存することで、有用なエントリを占有してしまうのです。
+後のイテレーションで別のパスを取ることになっても、そこに至るまでの履歴は異なります。
+最後に、キャッシュは完全にタグ付けされていますが、分岐予測器は（もしあれば）部分的なタグを使用するため、
+脱構築的なエイリアシングに悩まされることになります。</p>
+<p>もちろん、<strong>フェッチ</strong> と <strong>コミット</strong> の間のレイテンシーは不便ですし、
+複数のループイテレーションが行われている場合には、余計な分岐予測が発生する可能性があります。
+しかし、 <a class="reference internal" href="../terminology.html#term-Fetch-Target-Queue-FTQ"><span class="xref std std-term">FTQ</span></a> を使えば、
+分岐予測をバイパスしてこの問題を軽減することができます。
+現在、BOOMではこのバイパス動作はサポートされていません。</p>
+</div>
+<div class="section" id="id11">
+<h2>リネームスナップショットステート<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<p><span class="xref std std-term">FTQ</span> を正しい値にリセットする必要があります。</p>
+<p>この状態は非常に高価なものですが、 <strong>実行</strong> ステージで分岐が解決されると、解放することができます。
+したがって、この状態は <span class="xref std std-term">分岐りネームスナップショット</span> と並行して保存されます。
+<strong>デコード</strong> と <strong>リネーム</strong> の間、各分岐に <strong>分岐タグ</strong> が割り当てられ、
+予測違いが発生した場合に1サイクルでロールバックできるように、
+リネームテーブルのスナップショットが作成されます。
+分岐タグと <strong>リネームマップテーブル</strong> のスナップショットと同様に、
+対応する <a class="reference internal" href="../terminology.html#term-Branch-Rename-Snapshot"><span class="xref std std-term">Branch Rename Snapshot</span></a> は、<strong>実行</strong> の <a class="reference internal" href="../terminology.html#term-Branch-Unit"><span class="xref std std-term">Branch Unit</span></a> でブランチが解決されると、割り当て解除されます。</p>
+<div class="figure align-default" id="id29">
+<span id="predictor-pipeline"></span><img alt="The Branch Predictor Pipeline" src="../../_images/br-prediction-pipeline.svg" /><p class="caption"><span class="caption-number">Fig. 9 </span><span class="caption-text">Branch Predictor Pipeline(分岐予測パイプライン)。シンプルな図ですが、Branch Prediction Pipeline内のI/Oを示すのに役立ちます。
+<a class="reference internal" href="../terminology.html#term-Front-end"><span class="xref std std-term">Front-end</span></a> は、 <strong>F0</strong> ステージのパイプラインに「次のPC」 ( <code class="docutils literal notranslate"><span class="pre">req</span></code> と表示 )を送ります。
+“Abstract Predictor”の中では、”Abstract Predictor”のラッパーによってハッシュが管理されます。
+“Abstract Predictor”は、”BPD(Backing Predictor)”レスポンス、つまり “フェッチパケット “内の各命令に対する予測を返します。</span><a class="headerlink" href="#id29" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="id12">
+<h2>抽象分岐予測器クラス<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
+<p>さまざまなグローバルヒストリベースの <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> デザインの検討を容易にするために、
+抽象的な “BrPredictor” クラスが提供されます。
+このクラスは、 <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> とグローバルヒストリレジスターを管理するための制御ロジックへの標準的なインターフェースを提供します。
+この抽象クラスは <a class="reference internal" href="#predictor-pipeline"><span class="std std-numref">Fig. 9</span></a> の中にある “Abstract Predictor” という名前のクラスです。
+分岐予測器の詳細や例については、 <code class="xref std std-numref docutils literal notranslate"><span class="pre">gshire-predictor-pipeline</span></code> を参照してください。</p>
+</div>
+<div class="section" id="id13">
+<h2>グローバルヒストリ<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
+<p><span class="xref std std-ref">グローバルヒストリレジスタの管理</span> で説明したように、
+グローバルヒストリは分岐予測器の重要な要素です。
+そのため、抽象クラスである <code class="docutils literal notranslate"><span class="pre">BranchPredictor</span></code> クラスで処理されます。
+抽象クラスである <code class="docutils literal notranslate"><span class="pre">BranchPredictor</span></code> を拡張するすべての分岐予測器は、
+スナップショット、アップデート、バイパスを処理することなく、グローバルヒストリにアクセスすることができます。</p>
+<div class="section" id="id14">
+<h3>オペレーティングシステムを意識したグローバルヒストリ<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<p>その効果についてのデータは予備的なものですが、
+BOOMはOSを意識したグローバルヒストリをサポートしています。
+通常のグローバルヒストリは、すべての権限レベルのすべての命令を追跡します。
+2つ目の <em>ユーザーのみのグローバルヒストリ</em> は、ユーザーレベルの命令のみを追跡します。</p>
+</div>
+</div>
+<div class="section" id="id15">
+<h2>2ビットカウンタテーブル<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
+<p>ほとんどの分岐予測器の基本的な構成要素は、”2ビットカウンターテーブル”(2BC)です。
+特定の分岐が繰り返し実行されると、カウンターは最大値の3(<em>0b11</em>)、
+つまり”強く実行された”状態にまで飽和します。
+同様に、繰り返し取られていないブランチは、0に向かって飽和していきます（<em>0b00</em>）。
+上位のビットは”予測”を、低次のビットは”ヒステリシス”(予測の”強さ”)を指定します。</p>
+<div class="figure align-center" id="id30">
+<span id="gshare-predictor"></span><a class="reference internal image-reference" href="../../_images/2bc-prediction.png"><img alt="The GShare Predictor" src="../../_images/2bc-prediction.png" style="width: 495.0px; height: 249.89999999999998px;" /></a>
+<p class="caption"><span class="caption-number">Fig. 10 </span><span class="caption-text">A GShare Predictor uses the global history hashed with the PC to index into a table of 2-bit
+counters (2BCs). The high-order bit makes the prediction.</span><a class="headerlink" href="#id30" title="Permalink to this image">¶</a></p>
+</div>
+<p>これらの2ビットのカウンターはテーブルに集約されます。
+理想的には、優れた分岐予測器は、どのカウンターにインデックスを付ければ最良の予測ができるかを知っています。
+しかし、これらの2ビットカウンタを高密度のSRAMに収めるために、2BC有限状態機械に変更が加えられます。
+すなわち、 <em>弱い分岐不成立</em> 状態で行われた予測の間違いは、2BCを*強い分岐成立*状態に移動させます( <em>弱い分岐成立</em> が予測の間違いの場合はその逆)。
+この FSM の動作は <a class="reference internal" href="#two-bit-fsm"><span class="std std-numref">Fig. 11</span></a> に示されています。</p>
+<p>もはや厳密には”カウンター”ではありませんが、この変更により、
+<em>prediction</em> ビットと <em>hystersis</em> ビットの読み取りと書き込みの要件を分離し、
+それらを別々のシーケンシャルメモリテーブルに配置することができます。
+ハードウェアでは、2BCテーブルは次のように実装できます。</p>
+<p>Pビット:
+* <strong>Read</strong> - 毎サイクル予測を実行する
+* <strong>Write</strong> - 分岐予測に失敗したときのみ(h-bitの値)</p>
+<p>Hビット:</p>
+<ul class="simple">
+<li><p><strong>Read</strong> - 分岐予測に失敗したときのみ</p></li>
+<li><p><strong>Write</strong> - 分岐が解決したとき (分岐の方向を書き込む)</p></li>
+</ul>
+<div class="figure align-center" id="id31">
+<span id="two-bit-fsm"></span><a class="reference internal image-reference" href="../../_images/2bc-fsm.svg"><img alt="The Two-bit Counter State Machine" src="../../_images/2bc-fsm.svg" /></a>
+<p class="caption"><span class="caption-number">Fig. 11 </span><span class="caption-text">The Two-bit Counter (2BC) State Machine</span><a class="headerlink" href="#id31" title="Permalink to this image">¶</a></p>
+</div>
+<p>高次のpビットと低次のhビットを分離することで、
+それぞれを1リード/1ライトのSRAMに配置することができます。
+さらにいくつかの仮定を設けることで、より良い結果を得ることができます。
+予測を誤ることは稀であり、分岐の解決がすべてのサイクルで行われるとは限りません。
+また、書き込みが遅れたり、完全に取りこぼしたりすることもあります。
+そのため、書き込みをキューに入れておき、読み出しが行われていないときに書き込みを排出することで、
+1つの1RWポートのSRAMを使って <em>hテーブル</em> を実装することができます。
+同様に、 <em>p-table</em> は、書き込みをバッファリングし、
+読み取りが競合していないときにドレインすることで、1RWポートのSRAMを使って実装することができます。</p>
+<p>最後に、SRAMは、2BCテーブルが必要とする”背が高くて背が低い”アスペクト比に満足していません。
+しかし、解決策は簡単です。”背が高くて背が低い”、長方形のメモリ構造に簡単に変換できます。
+インデックスの高次ビットはSRAMの行に対応し、
+低次ビットは行内の特定のビットを取り出すために使用することができます。</p>
+</div>
+<div class="section" id="the-gshare-predictor">
+<h2>The GShare Predictor<a class="headerlink" href="#the-gshare-predictor" title="Permalink to this headline">¶</a></h2>
+<p><strong>GShare</strong> is a simple but very effective branch predictor.
+Predictions are made by hashing the instruction address and the <a class="reference internal" href="../terminology.html#term-Global-History-Register-GHR"><span class="xref std std-term">GHR</span></a>
+(typically a simple XOR) and then indexing into a table of
+two-bit counters. <a class="reference internal" href="#gshare-predictor"><span class="std std-numref">Fig. 10</span></a> shows the logical
+architecture and <a class="reference internal" href="#gshare-predictor-pipeline"><span class="std std-numref">Fig. 12</span></a> shows the physical implementation
+and structure of the <strong>GShare predictor</strong>. Note that the prediction
+begins in the <strong>F0</strong> stage when the requesting address is sent to the
+predictor but that the prediction is made later in the <strong>F3</strong> stage once
+the instructions have returned from the instruction cache and the
+prediction state has been read out of the <strong>GShare</strong>’s p-table.</p>
+<div class="figure align-default" id="id32">
+<span id="gshare-predictor-pipeline"></span><img alt="The GShare Predictor Pipeline" src="../../_images/gshare.svg" /><p class="caption"><span class="caption-number">Fig. 12 </span><span class="caption-text">The GShare Predictor Pipeline</span><a class="headerlink" href="#id32" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="the-tage-predictor">
+<h2>The TAGE Predictor<a class="headerlink" href="#the-tage-predictor" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-default" id="id33">
+<span id="tage-predictor"></span><img alt="The TAGE Predictor" src="../../_images/tage.png" />
+<p class="caption"><span class="caption-number">Fig. 13 </span><span class="caption-text">The TAGE predictor. The requesting address (PC) and the global history are fed into each
+table’s index hash and tag hash. Each table provides its own prediction (or no prediction) and the table
+with the longest history wins.</span><a class="headerlink" href="#id33" title="Permalink to this image">¶</a></p>
+</div>
+<p>BOOM also implements the <strong>TAGE</strong> conditional branch predictor. <strong>TAGE</strong> is a
+highly-parameterizable, state-of-the-art global history
+predictor. The design is able to
+maintain a high degree of accuracy while scaling from very small
+predictor sizes to very large predictor sizes. It is fast to learn short
+histories while also able to learn very, very long histories (over a
+thousand branches of history).</p>
+<p><strong>TAGE (TAgged GEometric)</strong> is implemented as a collection of predictor
+tables. Each table entry contains a <em>prediction counter</em>, a
+<em>usefulness counter</em>, and a <em>tag</em>. The <em>prediction counter</em>
+provides the prediction (and maintains some hysteresis as to how
+strongly biased the prediction is towards taken or not-taken). The
+<em>usefulness counter</em> tracks how useful the particular entry has been
+in the past for providing correct predictions. The <em>tag</em> allows the
+table to only make a prediction if there is a tag match for the
+particular requesting instruction address and global history.</p>
+<p>Each table has a different (and geometrically increasing) amount of
+history associated with it. Each table’s history is used to hash with
+the requesting instruction address to produce an index hash and a tag
+hash. Each table will make its own prediction (or no prediction, if
+there is no tag match). The table with the longest history making a
+prediction wins.</p>
+<p>On a misprediction, <strong>TAGE</strong> attempts to allocate a new entry. It will only
+overwrite an entry that is “not useful” (ubits == 0).</p>
+<div class="section" id="tage-global-history-and-the-circular-shift-registers-csrs-15">
+<h3>TAGE Global History and the Circular Shift Registers (CSRs) <a class="footnote-reference brackets" href="#id26" id="id16">15</a><a class="headerlink" href="#tage-global-history-and-the-circular-shift-registers-csrs-15" title="Permalink to this headline">¶</a></h3>
+<p>Each <strong>TAGE</strong> table has associated with it its own global history (and each
+table has geometrically more history than the last table). The histories
+contain many more bits of history that can be used to index a <strong>TAGE</strong> table; therefore, the
+history must be “folded” to fit. A table with 1024 entries uses 10 bits
+to index the table. Therefore, if the table uses 20 bits of global
+history, the top 10 bits of history are XOR’ed against the bottom 10
+bits of history.</p>
+<p>Instead of attempting to dynamically fold a very long history register
+every cycle, the history can be stored in a circular shift register (CSR).
+The history is stored already folded and only the new history bit and
+the oldest history bit need to be provided to perform an update.
+<a class="reference internal" href="#tage-csr"><span class="std std-numref">Listing 2</span></a> shows an example of how a CSR works.</p>
+<div class="literal-block-wrapper docutils container" id="id34">
+<span id="tage-csr"></span><div class="code-block-caption"><span class="caption-number">Listing 2 </span><span class="caption-text">The circular shift register. When a new branch outcome is added, the register is shifted (and wrapped around). The new outcome is added and the oldest bit in the history is “evicted”.</span><a class="headerlink" href="#id34" title="Permalink to this code">¶</a></div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Example:
+  A 12 bit value (0b_0111_1001_1111) folded onto a 5 bit CSR becomes
+  (0b_0_0010), which can be found by:
+
+
+               /-- history[12] (evict bit)
+               |
+ c[4], c[3], c[2], c[1], c[0]
+  |                        ^
+  |                        |
+  \_______________________/ \---history[0] (newly taken bit)
+
+
+(c[4] ^ h[ 0] generates the new c[0]).
+(c[1] ^ h[12] generates the new c[2]).
+</pre></div>
+</div>
+</div>
+<p>Each table must maintain <em>three</em> CSRs. The first CSR is used for
+computing the index hash and has a size <code class="docutils literal notranslate"><span class="pre">n=log(num_table_entries)</span></code>. As
+a CSR contains the folded history, any periodic history pattern matching
+the length of the CSR will XOR to all zeroes (potentially quite common).
+For this reason, there are two CSRs for computing the tag hash, one of
+width n and the other of width <code class="docutils literal notranslate"><span class="pre">n-1</span></code>.</p>
+<p>For every prediction, all three CSRs (for every table) must be
+snapshotted and reset if a branch misprediction occurs. Another three
+<em>commit copies</em> of these CSRs must be maintained to handle pipeline
+flushes.</p>
+</div>
+<div class="section" id="usefulness-counters-u-bits">
+<h3>Usefulness counters (u-bits)<a class="headerlink" href="#usefulness-counters-u-bits" title="Permalink to this headline">¶</a></h3>
+<p>The “usefulness” of an entry is stored in the <em>u-bit</em> counters.
+Roughly speaking, if an entry provides a correct prediction, the u-bit
+counter is incremented. If an entry provides an incorrect prediction,
+the u-bit counter is decremented. When a misprediction occurs, <strong>TAGE</strong>
+attempts to allocate a new entry. To prevent overwriting a useful entry,
+it will only allocate an entry if the existing entry has a usefulness of
+zero. However, if an entry allocation fails because all of the potential
+entries are useful, then all of the potential entries are decremented to
+potentially make room for an allocation in the future.</p>
+<p>To prevent <strong>TAGE</strong> from filling up with only useful but rarely-used
+entries, <strong>TAGE</strong> must provide a scheme for “degrading” the u-bits over
+time. A number of schemes are available. One option is a timer that
+periodically degrades the u-bit counters. Another option is to track the
+number of failed allocations (incrementing on a failed allocation and
+decremented on a successful allocation). Once the counter has saturated,
+all u-bits are degraded.</p>
+</div>
+<div class="section" id="tage-snapshot-state">
+<h3>TAGE Snapshot State<a class="headerlink" href="#tage-snapshot-state" title="Permalink to this headline">¶</a></h3>
+<p>For every prediction, all three CSRs (for every table) must be
+snapshotted and reset if a branch misprediction occurs. <strong>TAGE</strong> must also
+remember the index of each table that was checked for a prediction (so
+the correct entry for each table can be updated later). Finally, TAGE
+must remember the tag computed for each table – the tags will be needed
+later if a new entry is to be allocated. <a class="footnote-reference brackets" href="#id27" id="id17">16</a></p>
+</div>
+</div>
+<div class="section" id="other-predictors">
+<h2>Other Predictors<a class="headerlink" href="#other-predictors" title="Permalink to this headline">¶</a></h2>
+<p>BOOM provides a number of other predictors that may provide useful.</p>
+<div class="section" id="the-base-only-predictor">
+<h3>The Base Only Predictor<a class="headerlink" href="#the-base-only-predictor" title="Permalink to this headline">¶</a></h3>
+<p>The Base Only Predictor uses the BTBs <a class="reference internal" href="../terminology.html#term-Bi-Modal-Table-BIM"><span class="xref std std-term">BIM</span></a> to make a prediction on
+whether the branch was taken or not.</p>
+</div>
+<div class="section" id="the-null-predictor">
+<h3>The Null Predictor<a class="headerlink" href="#the-null-predictor" title="Permalink to this headline">¶</a></h3>
+<p>The Null Predictor is used when no <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">BPD</span></a> predictor is desired. It will
+always predict “not taken”.</p>
+</div>
+<div class="section" id="the-random-predictor">
+<h3>The Random Predictor<a class="headerlink" href="#the-random-predictor" title="Permalink to this headline">¶</a></h3>
+<p>The Random Predictor uses an LFSR to randomize both “was a prediction
+made?” and “which direction each branch in the <a class="reference internal" href="../terminology.html#term-Fetch-Packet"><span class="xref std std-term">Fetch Packet</span></a> should
+take?”. This is very useful for both torturing-testing BOOM and for
+providing a worse-case performance baseline for comparing branch
+predictors.</p>
+<dl class="footnote brackets">
+<dt class="label" id="id18"><span class="brackets"><a class="fn-backref" href="#id1">7</a></span></dt>
+<dd><p>It’s the <em>PC Tag</em> storage and <em>Branch Target</em> storage that
+makes the BTB within the <a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">Next-Line Predictor (NLP)</span></a> so expensive.</p>
+</dd>
+<dt class="label" id="id19"><span class="brackets"><a class="fn-backref" href="#id4">8</a></span></dt>
+<dd><p>JAL instructions jump to a <code class="docutils literal notranslate"><span class="pre">PC+Immediate</span></code> location, whereas
+JALR instructions jump to a <code class="docutils literal notranslate"><span class="pre">PC+Register[rs1]+Immediate</span></code> location.</p>
+</dd>
+<dt class="label" id="id20"><span class="brackets"><a class="fn-backref" href="#id5">9</a></span></dt>
+<dd><p>Redirecting the <a class="reference internal" href="../terminology.html#term-Front-end"><span class="xref std std-term">Front-end</span></a> in the <strong>F4</strong> Stage for
+ instructions is trivial, as the instruction can be decoded and its
+target can be known.</p>
+</dd>
+<dt class="label" id="id21"><span class="brackets"><a class="fn-backref" href="#id6">10</a></span></dt>
+<dd><p>In the data-cache, it can be useful to fetch data from the wrong
+path - it is possible that future code executions may want to access
+the data. Worst case, the cache’s effective capacity is reduced. But
+it can be quite dangerous to add wrong-path information to the <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">Backing Predictor (BPD)</span></a> -
+it truly represents a code-path that is never exercised, so the
+information will <em>never</em> be useful in later code executions.
+Worst, aliasing is a problem in branch predictors (at most partial
+tag checks are used) and wrong-path information can create
+deconstructive aliasing problems that worsens prediction accuracy.
+Finally, bypassing of the inflight prediction information can occur,
+eliminating any penalty of not updating the predictor until the
+<strong>Commit</strong> stage.</p>
+</dd>
+<dt class="label" id="id22"><span class="brackets"><a class="fn-backref" href="#id7">11</a></span></dt>
+<dd><p>These <em>info packets</em> are not stored in the ROB for two
+reasons - first, they correspond to <span class="xref std std-term">Fetch Packet`s, not
+instructions. Second, they are very expensive and so it is
+reasonable to size the :term:`Fetch Target Queue (FTQ)</span> to be smaller than the ROB.</p>
+</dd>
+<dt class="label" id="id23"><span class="brackets"><a class="fn-backref" href="#id8">12</a></span></dt>
+<dd><p>Actually, the direction of all conditional branches within a
+<a class="reference internal" href="../terminology.html#term-Fetch-Packet"><span class="xref std std-term">Fetch Packet</span></a> are compressed (via an OR-reduction) into a
+single bit, but for this section, it is easier to describe the
+history register in slightly inaccurate terms.</p>
+</dd>
+<dt class="label" id="id24"><span class="brackets"><a class="fn-backref" href="#id9">13</a></span></dt>
+<dd><p>Notice that there is a delay between beginning to make a
+prediction in the <strong>F0</strong> stage (when the global history is read)
+and redirecting the <a class="reference internal" href="../terminology.html#term-Front-end"><span class="xref std std-term">Front-end</span></a> in the <strong>F4</strong> stage (when the
+global history is updated). This results in a “shadow” in which a
+branch beginning to make a prediction in <strong>F0</strong> will not see the
+branches (or their outcomes) that came a cycle (or two) earlier in
+the program (that are currently in <strong>F1/2/3</strong> stages).
+It is vitally important though that these “shadow branches” be
+reflected in the global history snapshot.</p>
+</dd>
+<dt class="label" id="id25"><span class="brackets"><a class="fn-backref" href="#id10">14</a></span></dt>
+<dd><p>An example of a pipeline replay is a <em>memory ordering
+failure</em> in which a load executed before an older store it
+depends on and got the wrong data. The only recovery requires
+flushing the entire pipeline and re-executing the load.</p>
+</dd>
+<dt class="label" id="id26"><span class="brackets"><a class="fn-backref" href="#id16">15</a></span></dt>
+<dd><p>No relation to the Control/Status Registers (CSRs) in RISC-V.</p>
+</dd>
+<dt class="label" id="id27"><span class="brackets"><a class="fn-backref" href="#id17">16</a></span></dt>
+<dd><p>There are ways to mitigate some of these costs, but this margin
+is too narrow to contain them.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../decode-stage.html" class="btn btn-neutral float-right" title="デコードステージ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="nl-predictor.html" class="btn btn-neutral float-left" title="The Next-Line Predictor (NLP)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

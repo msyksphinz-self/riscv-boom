@@ -1,0 +1,320 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Terminology &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Frequently Asked Questions" href="faq.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Terminology</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sections/terminology.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="terminology">
+<h1>Terminology<a class="headerlink" href="#terminology" title="Permalink to this headline">¶</a></h1>
+<p>This terminology page contains terms/concepts that are unique to the BOOM core that may/may not match with other
+out-of-order terminology.</p>
+<dl class="glossary simple">
+<dt id="term-Fetch-Packet">Fetch Packet</dt><dd><p>A bundle returned by the Front-end which contains
+some set of consecutive instructions with a mask
+denoting which instructions are valid, amongst
+other meta-data related to instruction fetch and
+branch prediction. The Fetch PC will point
+to the first valid instruction in the
+Fetch Packet, as it is the PC used by the
+Front End to fetch the Fetch Packet.</p>
+</dd>
+<dt id="term-Fetch-PC">Fetch PC</dt><dd><p>The PC corresponding to the head of a
+Fetch Packet instruction group.</p>
+</dd>
+<dt id="term-Fetch-Buffer">Fetch Buffer</dt><dd><p>Buffer that holds Fetch Packets that are sent to the
+Back-end.</p>
+</dd>
+<dt id="term-TAGE-Predictor">TAGE Predictor</dt><dd><p>A high performance branch predictor. For more information
+read the paper “A case for (partially) tagged geometric history length predictors”.</p>
+</dd>
+<dt id="term-GShare-Predictor">GShare Predictor</dt><dd><p>A simpler branch predictor that uses a global history to index into a set of
+counters.</p>
+</dd>
+<dt id="term-Bi-Modal-Table-BIM">Bi-Modal Table (BIM)</dt><dd><p>A counter table.</p>
+</dd>
+<dt id="term-Micro-Op-UOP">Micro-Op (UOP)</dt><dd><p>Element sent throughout the pipeline holding information about the type of
+Micro-Op, its PC, pointers to the FTQ, ROB, LDQ, STQs, and more.</p>
+</dd>
+<dt id="term-Front-end">Front-end</dt><dd><p>The Fetch and Branch Prediction portions of the pipeline that fetch instructions
+from the i-cache.</p>
+</dd>
+<dt id="term-Back-end">Back-end</dt><dd><p>The stages starting from Dispatch to Writeback. Here instructions
+are executed, dependencies resolved, branches resolved, etc.</p>
+</dd>
+<dt id="term-Fetch-Boundary">Fetch Boundary</dt><dd><p>The bytes at the end of a i-cache response that might be half of an instruction
+used in RVC.</p>
+</dd>
+<dt id="term-Fetch-Target-Queue-FTQ">Fetch Target Queue (FTQ)</dt><dd><p>Queue used to track the branch prediction information for inflight Micro-Ops.
+This is dequeued once all instructions in its Fetch Packet entry are
+committed.</p>
+</dd>
+<dt id="term-Next-Line-Predictor-NLP">Next-Line Predictor (NLP)</dt><dd><p>Consists of a Branch Target Buffer (BTB),
+Return Address Stack (RAS) and Bi-Modal Table (BIM).
+This is used to make quick predictions to redirect the Front-end</p>
+</dd>
+<dt id="term-Backing-predictor-BPD">Backing predictor (BPD)</dt><dd><p>Slower but more complicated predictor used to track longer
+histories. In BOOM you can have multiple different types of
+a Backing predictor (TAGE, GShare…).</p>
+</dd>
+<dt id="term-Branch-Target-Buffer-BTB">Branch Target Buffer (BTB)</dt><dd><p>Tagged entry table in which a PC is used to find a matching
+target. Thus, if there is a hit, the specified target is used
+to redirect the pipeline.</p>
+</dd>
+<dt id="term-Return-Address-Stack-RAS">Return Address Stack (RAS)</dt><dd><p>Stack used to track function calls. It is pushed with a PC
+on a JAL or JALR and popped during a RET.</p>
+</dd>
+<dt id="term-Fetch-Width">Fetch Width</dt><dd><p>The amount of instructions retrieved from the i-cache from the
+Front-end of the processor.</p>
+</dd>
+<dt id="term-Global-History-Register-GHR">Global History Register (GHR)</dt><dd><p>A register holding the last N taken/not taken results of branches
+in the processor. However, in BOOM, each bit does not correspond to a
+bit of history. Instead this is a hashed history.</p>
+</dd>
+<dt id="term-Rename-Snapshots">Rename Snapshots</dt><dd><p>Saved state used to reset the pipeline to a correct state after a
+misspeculation or other redirecting event.</p>
+</dd>
+<dt id="term-Branch-Unit">Branch Unit</dt><dd><p>The functional unit that resolves a branch in the Execute Pipeline.</p>
+</dd>
+<dt id="term-Branch-Rename-Snapshot">Branch Rename Snapshot</dt><dd><p>Metadata and prediction snapshots that are used to fix the branch predictor after
+mispredictions.</p>
+</dd>
+<dt id="term-Execution-Unit">Execution Unit</dt><dd><p>A module that wraps multiple Functional Units within it.
+It is attached to one issue port only.</p>
+</dd>
+<dt id="term-Functional-Unit">Functional Unit</dt><dd><p>A specific hardware module to compute some function (i.e. ALU, FPU, etc).</p>
+</dd>
+</dl>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="faq.html" class="btn btn-neutral float-left" title="Frequently Asked Questions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

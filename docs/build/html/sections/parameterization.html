@@ -1,0 +1,389 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Parameterization &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The BOOM Development Ecosystem" href="boom-ecosystem.html" />
+    <link rel="prev" title="The Memory System" href="memory-system.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Parameterization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#general-parameters">General Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sample-configurations">Sample Configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-parameters">Other Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Parameterization</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sections/parameterization.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="parameterization">
+<h1>Parameterization<a class="headerlink" href="#parameterization" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="general-parameters">
+<h2>General Parameters<a class="headerlink" href="#general-parameters" title="Permalink to this headline">¶</a></h2>
+<p>Listing <code class="xref std std-numref docutils literal notranslate"><span class="pre">general-boom-params</span></code> lists the top-level parameters that you can manipulate for a BOOM core.
+This is taken from <code class="docutils literal notranslate"><span class="pre">src/main/scala/common/parameters.scala</span></code>.</p>
+<div class="highlight-scala notranslate" id="general-boom-params"><div class="highlight"><pre><span></span>  <span class="n">fetchWidth</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span>
+  <span class="n">decodeWidth</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span>
+  <span class="n">numRobEntries</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">64</span><span class="o">,</span>
+  <span class="n">issueParams</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">IssueParams</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span>
+    <span class="nc">IssueParams</span><span class="o">(</span><span class="n">issueWidth</span><span class="k">=</span><span class="mi">1</span><span class="o">,</span> <span class="n">numEntries</span><span class="k">=</span><span class="mi">16</span><span class="o">,</span> <span class="n">iqType</span><span class="k">=</span><span class="nc">IQT_MEM</span><span class="o">.</span><span class="n">litValue</span><span class="o">,</span> <span class="n">dispatchWidth</span><span class="k">=</span><span class="mi">1</span><span class="o">),</span>
+    <span class="nc">IssueParams</span><span class="o">(</span><span class="n">issueWidth</span><span class="k">=</span><span class="mi">2</span><span class="o">,</span> <span class="n">numEntries</span><span class="k">=</span><span class="mi">16</span><span class="o">,</span> <span class="n">iqType</span><span class="k">=</span><span class="nc">IQT_INT</span><span class="o">.</span><span class="n">litValue</span><span class="o">,</span> <span class="n">dispatchWidth</span><span class="k">=</span><span class="mi">1</span><span class="o">),</span>
+    <span class="nc">IssueParams</span><span class="o">(</span><span class="n">issueWidth</span><span class="k">=</span><span class="mi">1</span><span class="o">,</span> <span class="n">numEntries</span><span class="k">=</span><span class="mi">16</span><span class="o">,</span> <span class="n">iqType</span><span class="k">=</span><span class="nc">IQT_FP</span><span class="o">.</span><span class="n">litValue</span> <span class="o">,</span> <span class="n">dispatchWidth</span><span class="k">=</span><span class="mi">1</span><span class="o">)),</span>
+  <span class="n">numLdqEntries</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">16</span><span class="o">,</span>
+  <span class="n">numStqEntries</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">16</span><span class="o">,</span>
+  <span class="n">numIntPhysRegisters</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">96</span><span class="o">,</span>
+  <span class="n">numFpPhysRegisters</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">64</span><span class="o">,</span>
+  <span class="n">maxBrCount</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">4</span><span class="o">,</span>
+  <span class="n">numFetchBufferEntries</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">16</span><span class="o">,</span>
+  <span class="n">enableAgePriorityIssue</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">enablePrefetching</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">enableFastLoadUse</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">enableCommitMapTable</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">enableFastPNR</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">enableSFBOpt</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">enableGHistStallRepair</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">enableBTBFastRepair</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">useAtomicsOnlyForIO</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">ftq</span><span class="k">:</span> <span class="kt">FtqParameters</span> <span class="o">=</span> <span class="nc">FtqParameters</span><span class="o">(),</span>
+  <span class="n">intToFpLatency</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">2</span><span class="o">,</span>
+  <span class="n">imulLatency</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">3</span><span class="o">,</span>
+  <span class="n">nPerfCounters</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span>
+  <span class="n">numRXQEntries</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">4</span><span class="o">,</span>
+  <span class="n">numRCQEntries</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">8</span><span class="o">,</span>
+  <span class="n">numDCacheBanks</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span>
+  <span class="n">nPMPs</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">8</span><span class="o">,</span>
+  <span class="n">enableICacheDelay</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+
+  <span class="cm">/* branch prediction */</span>
+  <span class="n">enableBranchPrediction</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">branchPredictor</span><span class="k">:</span> <span class="kt">Function2</span><span class="o">[</span><span class="kt">BranchPredictionBankResponse</span><span class="p">,</span> <span class="kt">Parameters</span><span class="p">,</span> <span class="kt">Tuple2</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">BranchPredictorBank</span><span class="o">]</span><span class="p">,</span> <span class="kt">BranchPredictionBankResponse</span><span class="o">]]</span> <span class="k">=</span> <span class="o">((</span><span class="n">resp_in</span><span class="k">:</span> <span class="kt">BranchPredictionBankResponse</span><span class="o">,</span> <span class="n">p</span><span class="k">:</span> <span class="kt">Parameters</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="o">(</span><span class="nc">Nil</span><span class="o">,</span> <span class="n">resp_in</span><span class="o">)),</span>
+  <span class="n">globalHistoryLength</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">64</span><span class="o">,</span>
+  <span class="n">localHistoryLength</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">32</span><span class="o">,</span>
+  <span class="n">localHistoryNSets</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">128</span><span class="o">,</span>
+  <span class="n">bpdMaxMetaLength</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">120</span><span class="o">,</span>
+  <span class="n">numRasEntries</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">32</span><span class="o">,</span>
+  <span class="n">enableRasTopRepair</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+
+  <span class="cm">/* more stuff */</span>
+  <span class="n">useCompressed</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">useFetchMonitor</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">bootFreqHz</span><span class="k">:</span> <span class="kt">BigInt</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span>
+  <span class="n">fpu</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">FPUParams</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="nc">FPUParams</span><span class="o">(</span><span class="n">sfmaLatency</span><span class="k">=</span><span class="mi">4</span><span class="o">,</span> <span class="n">dfmaLatency</span><span class="k">=</span><span class="mi">4</span><span class="o">)),</span>
+  <span class="n">usingFPU</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">haveBasicCounters</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">misaWritable</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">mtvecInit</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">BigInt</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="nc">BigInt</span><span class="o">(</span><span class="mi">0</span><span class="o">)),</span>
+  <span class="n">mtvecWritable</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">haveCFlush</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">mulDiv</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">freechips.rocketchip.rocket.MulDivParams</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="nc">MulDivParams</span><span class="o">(</span><span class="n">divEarlyOut</span><span class="k">=</span><span class="kc">true</span><span class="o">)),</span>
+  <span class="n">nBreakpoints</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="c1">// TODO Fix with better frontend breakpoint unit</span>
+  <span class="n">nL2TLBEntries</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">512</span><span class="o">,</span>
+  <span class="n">nL2TLBWays</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span>
+  <span class="n">nLocalInterrupts</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span>
+  <span class="n">useNMI</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">useAtomics</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">useDebug</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">useUser</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">useSupervisor</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">useVM</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">,</span>
+  <span class="n">useSCIE</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">useRVE</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">useBPWatch</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">clockGate</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">mcontextWidth</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span>
+  <span class="n">scontextWidth</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span>
+
+  <span class="cm">/* debug stuff */</span>
+  <span class="n">enableCommitLogPrintf</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">enableBranchPrintf</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span>
+  <span class="n">enableMemtracePrintf</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sample-configurations">
+<h2>Sample Configurations<a class="headerlink" href="#sample-configurations" title="Permalink to this headline">¶</a></h2>
+<p>Sample configurations of the core and the parameters used can be seen in <code class="docutils literal notranslate"><span class="pre">src/main/scala/common/config-mixins.scala</span></code>.
+The following code shows an example of the “Large BOOM Configuration”.</p>
+<div class="highlight-scala notranslate" id="large-boom-config"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * 3-wide BOOM. Try to match the Cortex-A15.</span>
+<span class="cm"> */</span>
+<span class="k">class</span> <span class="nc">WithNLargeBooms</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span> <span class="n">overrideIdOffset</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="nc">None</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">Config</span><span class="o">(</span>
+  <span class="k">new</span> <span class="nc">WithTAGELBPD</span> <span class="o">++</span> <span class="c1">// Default to TAGE-L BPD</span>
+  <span class="k">new</span> <span class="nc">Config</span><span class="o">((</span><span class="n">site</span><span class="o">,</span> <span class="n">here</span><span class="o">,</span> <span class="n">up</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="nc">TilesLocated</span><span class="o">(</span><span class="nc">InSubsystem</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="o">{</span>
+      <span class="k">val</span> <span class="n">prev</span> <span class="k">=</span> <span class="n">up</span><span class="o">(</span><span class="nc">TilesLocated</span><span class="o">(</span><span class="nc">InSubsystem</span><span class="o">),</span> <span class="n">site</span><span class="o">)</span>
+      <span class="k">val</span> <span class="n">idOffset</span> <span class="k">=</span> <span class="n">overrideIdOffset</span><span class="o">.</span><span class="n">getOrElse</span><span class="o">(</span><span class="n">prev</span><span class="o">.</span><span class="n">size</span><span class="o">)</span>
+      <span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="o">).</span><span class="n">map</span> <span class="o">{</span> <span class="n">i</span> <span class="k">=&gt;</span>
+        <span class="nc">BoomTileAttachParams</span><span class="o">(</span>
+          <span class="n">tileParams</span> <span class="k">=</span> <span class="nc">BoomTileParams</span><span class="o">(</span>
+            <span class="n">core</span> <span class="k">=</span> <span class="nc">BoomCoreParams</span><span class="o">(</span>
+              <span class="n">fetchWidth</span> <span class="k">=</span> <span class="mi">8</span><span class="o">,</span>
+              <span class="n">decodeWidth</span> <span class="k">=</span> <span class="mi">3</span><span class="o">,</span>
+              <span class="n">numRobEntries</span> <span class="k">=</span> <span class="mi">96</span><span class="o">,</span>
+              <span class="n">issueParams</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span>
+                <span class="nc">IssueParams</span><span class="o">(</span><span class="n">issueWidth</span><span class="k">=</span><span class="mi">1</span><span class="o">,</span> <span class="n">numEntries</span><span class="k">=</span><span class="mi">16</span><span class="o">,</span> <span class="n">iqType</span><span class="k">=</span><span class="nc">IQT_MEM</span><span class="o">.</span><span class="n">litValue</span><span class="o">,</span> <span class="n">dispatchWidth</span><span class="k">=</span><span class="mi">3</span><span class="o">),</span>
+                <span class="nc">IssueParams</span><span class="o">(</span><span class="n">issueWidth</span><span class="k">=</span><span class="mi">3</span><span class="o">,</span> <span class="n">numEntries</span><span class="k">=</span><span class="mi">32</span><span class="o">,</span> <span class="n">iqType</span><span class="k">=</span><span class="nc">IQT_INT</span><span class="o">.</span><span class="n">litValue</span><span class="o">,</span> <span class="n">dispatchWidth</span><span class="k">=</span><span class="mi">3</span><span class="o">),</span>
+                <span class="nc">IssueParams</span><span class="o">(</span><span class="n">issueWidth</span><span class="k">=</span><span class="mi">1</span><span class="o">,</span> <span class="n">numEntries</span><span class="k">=</span><span class="mi">24</span><span class="o">,</span> <span class="n">iqType</span><span class="k">=</span><span class="nc">IQT_FP</span><span class="o">.</span><span class="n">litValue</span> <span class="o">,</span> <span class="n">dispatchWidth</span><span class="k">=</span><span class="mi">3</span><span class="o">)),</span>
+              <span class="n">numIntPhysRegisters</span> <span class="k">=</span> <span class="mi">100</span><span class="o">,</span>
+              <span class="n">numFpPhysRegisters</span> <span class="k">=</span> <span class="mi">96</span><span class="o">,</span>
+              <span class="n">numLdqEntries</span> <span class="k">=</span> <span class="mi">24</span><span class="o">,</span>
+              <span class="n">numStqEntries</span> <span class="k">=</span> <span class="mi">24</span><span class="o">,</span>
+              <span class="n">maxBrCount</span> <span class="k">=</span> <span class="mi">16</span><span class="o">,</span>
+              <span class="n">numFetchBufferEntries</span> <span class="k">=</span> <span class="mi">24</span><span class="o">,</span>
+              <span class="n">ftq</span> <span class="k">=</span> <span class="nc">FtqParameters</span><span class="o">(</span><span class="n">nEntries</span><span class="k">=</span><span class="mi">32</span><span class="o">),</span>
+              <span class="n">fpu</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="n">freechips</span><span class="o">.</span><span class="n">rocketchip</span><span class="o">.</span><span class="n">tile</span><span class="o">.</span><span class="nc">FPUParams</span><span class="o">(</span><span class="n">sfmaLatency</span><span class="k">=</span><span class="mi">4</span><span class="o">,</span> <span class="n">dfmaLatency</span><span class="k">=</span><span class="mi">4</span><span class="o">,</span> <span class="n">divSqrt</span><span class="k">=</span><span class="kc">true</span><span class="o">))</span>
+            <span class="o">),</span>
+            <span class="n">dcache</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span>
+              <span class="nc">DCacheParams</span><span class="o">(</span><span class="n">rowBits</span> <span class="k">=</span> <span class="n">site</span><span class="o">(</span><span class="nc">SystemBusKey</span><span class="o">).</span><span class="n">beatBits</span><span class="o">,</span> <span class="n">nSets</span><span class="k">=</span><span class="mi">64</span><span class="o">,</span> <span class="n">nWays</span><span class="k">=</span><span class="mi">8</span><span class="o">,</span> <span class="n">nMSHRs</span><span class="k">=</span><span class="mi">4</span><span class="o">,</span> <span class="n">nTLBWays</span><span class="k">=</span><span class="mi">16</span><span class="o">)</span>
+            <span class="o">),</span>
+            <span class="n">icache</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span>
+              <span class="nc">ICacheParams</span><span class="o">(</span><span class="n">rowBits</span> <span class="k">=</span> <span class="n">site</span><span class="o">(</span><span class="nc">SystemBusKey</span><span class="o">).</span><span class="n">beatBits</span><span class="o">,</span> <span class="n">nSets</span><span class="k">=</span><span class="mi">64</span><span class="o">,</span> <span class="n">nWays</span><span class="k">=</span><span class="mi">8</span><span class="o">,</span> <span class="n">fetchBytes</span><span class="k">=</span><span class="mi">4</span><span class="o">*</span><span class="mi">4</span><span class="o">)</span>
+            <span class="o">),</span>
+            <span class="n">hartId</span> <span class="k">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">idOffset</span>
+          <span class="o">),</span>
+          <span class="n">crossingParams</span> <span class="k">=</span> <span class="nc">RocketCrossingParams</span><span class="o">()</span>
+        <span class="o">)</span>
+      <span class="o">}</span> <span class="o">++</span> <span class="n">prev</span>
+    <span class="o">}</span>
+    <span class="k">case</span> <span class="nc">SystemBusKey</span> <span class="k">=&gt;</span> <span class="n">up</span><span class="o">(</span><span class="nc">SystemBusKey</span><span class="o">,</span> <span class="n">site</span><span class="o">).</span><span class="n">copy</span><span class="o">(</span><span class="n">beatBytes</span> <span class="k">=</span> <span class="mi">16</span><span class="o">)</span>
+    <span class="k">case</span> <span class="nc">XLen</span> <span class="k">=&gt;</span> <span class="mi">64</span>
+  <span class="o">})</span>
+<span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="other-parameters">
+<h2>Other Parameters<a class="headerlink" href="#other-parameters" title="Permalink to this headline">¶</a></h2>
+<p>You can also manipulate other parameters such as Rocket Chip SoC parameters, Uncore, BTB, BIM, BPU, and more when configuring the SoC!
+However, this is done in the top-level project that adds BOOM so this will not be discussed here.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="boom-ecosystem.html" class="btn btn-neutral float-right" title="The BOOM Development Ecosystem" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="memory-system.html" class="btn btn-neutral float-left" title="The Memory System" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

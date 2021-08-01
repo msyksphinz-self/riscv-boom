@@ -1,0 +1,338 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The Next-Line Predictor (NLP) &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="The Backing Predictor (BPD)" href="backing-predictor.html" />
+    <link rel="prev" title="分岐予測" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">分岐予測</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">The Next-Line Predictor (NLP)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nlp">NLP予測</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">NLPの更新</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#btb">BTBの更新</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ras">RASの更新</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">スーパスカラの分岐予測</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backing-predictor.html">The Backing Predictor (BPD)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">分岐予測</a> &raquo;</li>
+        
+      <li>The Next-Line Predictor (NLP)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/sections/branch-prediction/nl-predictor.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="the-next-line-predictor-nlp">
+<h1>The Next-Line Predictor (NLP)<a class="headerlink" href="#the-next-line-predictor-nlp" title="Permalink to this headline">¶</a></h1>
+<p>BOOMコアの <span class="xref std std-term">フロントエンド</span> は命令をフェッチし、次の命令をどこでフェッチするかをサイクルごとに予測します。
+BOOMの <span class="xref std std-term">バックエンド</span> で予測の間違いが検出されたり、
+BOOM自身の <a class="reference internal" href="../terminology.html#term-Backing-predictor-BPD"><span class="xref std std-term">Backing Predictor (BPD)</span></a> がパイプラインを別の方向に向かわせたいと考えた場合、
+<span class="xref std std-term">フロントエンド</span> にリクエストが送られ、新しい命令パスに沿ってフェッチを開始します。</p>
+<p>Next-Line Predictor (NLP)`は、命令をフェッチするために使用されている現在のPC（ <a class="reference internal" href="../terminology.html#term-Fetch-PC"><span class="xref std std-term">Fetch PC</span></a> ）を取り込み、次のサイクルでどこに次の命令をフェッチすべきかを組み合わせて予測します。予測が正しければ、パイプライン・バブルは発生しません。</p>
+<p><a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">NLP</span></a> は、完全に関連付けられた <strong>BTB (Branch Target Buffer)</strong>、 <a class="reference internal" href="../terminology.html#term-Bi-Modal-Table-BIM"><span class="xref std std-term">Bi-Modal Table (BIM)</span></a>、 <strong>RAS (Return Address Stack)</strong> を組み合わせたもので、高速かつ適度に正確な予測を行うことができます。</p>
+<div class="section" id="nlp">
+<h2>NLP予測<a class="headerlink" href="#nlp" title="Permalink to this headline">¶</a></h2>
+<p><span class="xref std std-term">フェッチPC</span> は、まずタグマッチを実行して、一意に一致するBTBエントリを見つけます。
+ヒットした場合、BTBエントリはRASと連携して、 <span class="xref std std-term">フェッチパケット</span> で見つかった分岐、ジャンプ、リターンがあるかどうか、
+<span class="xref std std-term">フェッチパケットt</span> のどの命令が原因かを予測します。
+<cite>BIM&lt;Bi-Modal Table (BIM)&gt;</cite> は、その予測されたものが、分岐が取られたものか、取られなかったものかを判断するために使用されます。
+BTBのエントリーには予測されたPCターゲットも含まれており、これは次のサイクルで <span class="xref std std-term">フェッチPC</span> として使用されます。</p>
+<div class="figure align-center" id="nlp-predictor-unit">
+<a class="reference internal image-reference" href="../../_images/btb.png"><img alt="The :term:`Next-Line Predictor`" src="../../_images/btb.png" style="width: 498.74999999999994px; height: 244.99999999999997px;" /></a>
+</div>
+<p><a class="reference internal" href="../terminology.html#term-Bi-Modal-Table-BIM"><span class="xref std std-term">BIM</span></a> のヒステリシスビットは、BTBエントリ <em>hit</em> のときと、
+予測される命令が分岐のときにのみ使用されます。</p>
+<p>BTBエントリに <em>return</em> 命令が含まれている場合、RASスタックは予測されたリターンPCを次の <span class="xref std std-term">フェッチ</span> として提供するために使用されます。
+実際のRASの管理(いつスタックを使用するか)は外部で管理されます。</p>
+<p>面積効率を上げるために、PCタグとPCターゲットの高次ビットは圧縮ファイルに格納されます。</p>
+</div>
+<div class="section" id="id1">
+<h2>NLPの更新<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>パイプラインを通過した各分岐は、自分のPCだけでなく、その <span class="xref std std-term">フェッチPC</span> ( <span class="xref std std-term">フェッチパケット</span> の先頭命令のPC) も記憶しています。<a class="footnote-reference brackets" href="#id7" id="id2">2</a></p>
+<div class="section" id="btb">
+<h3>BTBの更新<a class="headerlink" href="#btb" title="Permalink to this headline">¶</a></h3>
+<p>BTBは、 <span class="xref std std-term">フロントエンド</span> が、 <span class="xref std std-term">分岐ユニット</span> (実行ステージ)または <span class="xref std std-term">BPD</span>
+(<strong>Fetch</strong> ステージの後半)によって、分岐またはジャンプを取るようにリダイレクトされたときにのみ、 更新されます。<a class="footnote-reference brackets" href="#id8" id="id3">3</a></p>
+<p>分岐成立した分岐命令やジャンプに対応するBTBエントリがない場合は、
+新しいエントリが割り当てられます。</p>
+</div>
+<div class="section" id="ras">
+<h3>RASの更新<a class="headerlink" href="#ras" title="Permalink to this headline">¶</a></h3>
+<p>RASは、フェッチ段階で、 <span class="xref std std-term">フェッチパケット</span> に含まれる命令がデコードされると更新されます。
+命令が関数呼び出し <a class="footnote-reference brackets" href="#id9" id="id4">4</a> の場合は、リターンアドレスがRASにプッシュされます。
+命令がリターンであれば、RASはポップされます。</p>
+</div>
+<div class="section" id="id5">
+<h3>スーパスカラの分岐予測<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">NLP</span></a> が予測を行う場合、実際にはBTBを使用して、
+予測されたブランチの <span class="xref std std-term">フェッチPC</span> に対してタグマッチを行っており、分岐命令自体のPCではありません。
+<a class="reference internal" href="../terminology.html#term-Next-Line-Predictor-NLP"><span class="xref std std-term">NLP</span></a> は、多くの可能性のある分岐命令のうち、
+どの命令がPCをリダイレクトする支配的な分岐になるかを、 <span class="xref std std-term">フェッチパケット</span> 全体にわたって予測しなければなりません。
+このような理由から，BTBタグマッチでは，あるブランチのPCではなく，そのブランチの <span class="xref std std-term">フェッチPC</span> を使用します。<a class="footnote-reference brackets" href="#id10" id="id6">5</a></p>
+<dl class="footnote brackets">
+<dt class="label" id="id7"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>実際には、上位のビットは同じであるため、最下位のビットのみを保存する必要があります。</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id8"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dd><p>BTBでは、ちょっとした工夫をしています。分岐予測失敗によりPCをリダイレクトする際、
+この新しい <span class="xref std std-term">フェッチPC</span> は、新しいBTBエントリのターゲットPCフィールドに書き込まれる必要のあるアップデートPCと同じものです。
+この「偶然の一致」により、PC圧縮テーブルは単一の検索ポートを使用することができます。
+つまり、次の予測のためにテーブルを読むと同時に、
+新しいアップデートPCに適切な高次ビットがすでに割り当てられているかどうかを確認します。</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id9"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
+<dd><p>RISC-Vには専用のコール命令はありませんが、x1(別名：リターンアドレスレジスタ)への
+ライトバック先を持つJALまたはJALR命令をチェックすることで、コールを推測することができます。</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id10"><span class="brackets"><a class="fn-backref" href="#id6">5</a></span></dt>
+<dd><p>各BTBエントリは、単一の <span class="xref std std-term">フェッチPC</span> に対応していますが、 <span class="xref std std-term">フェッチパケット</span> 全体を予測するのに役立ちます。
+しかし、BTBエントリは、1つの制御フロー命令上でメタデータとターゲットデータしか格納できません。
+この設計では、確かに性能に悪影響を及ぼす病的なケースもありますが、
+<span class="xref std std-term">フェッチパケット</span> 内のどのブランチが :term: <cite>フェッチPC</cite> に対して支配的なブランチであるかという相関関係があることが前提となっており、
+少なくともナローフェッチの設計においては、この設計の評価では、性能に目立った損失がなく、
+非常に複雑になりにくいことが示されています。
+他のいくつかのデザインでは、代わりに <span class="xref std std-term">フェッチパケット</span> の各命令に対してBTBのバンク全体を提供することを選択しています。</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="backing-predictor.html" class="btn btn-neutral float-right" title="The Backing Predictor (BPD)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="分岐予測" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

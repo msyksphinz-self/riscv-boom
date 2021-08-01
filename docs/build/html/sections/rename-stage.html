@@ -1,0 +1,364 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>リネームステージ &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="リオーダバッファ(ROB)とディスパッチステージ" href="reorder-buffer.html" />
+    <link rel="prev" title="デコードステージ" href="decode-stage.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">リネームステージ</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">リネームの目的</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">明示的なリネームのデザイン</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">リネームマップテーブル</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">例外とフラッシュによるリセット</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">ビジーテーブル</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">フリーリスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">古くなったリネームレジスタ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution-stages.html">実行パイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>リネームステージ</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sections/rename-stage.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="id1">
+<h1>リネームステージ<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p><strong>リネーム</strong> ステージでは、各命令の <em>ISA</em> (または <em>論理</em> )レジスタ指定子を
+<em>物理</em> レジスタ指定子にマッピングします。</p>
+<div class="section" id="id2">
+<h2>リネームの目的<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p><em>リネーム</em> は、命令の <em>ISA</em> (または <em>論理</em> )レジスタ指定子を、
+新しい <em>物理</em> レジスタの空間にマッピングすることで、名前を変更する技術です。
+レジスタリネームの目的は、命令間の出力依存性(WAW)と逆依存性(WAR)を断ち切り、
+真の依存性(RAW)だけを残すことです。
+これは、a) 指定子として使用できるISAレジスタの数が限られていること、
+b)ループはその性質上、ループの反復ごとに同じレジスタ指定子を使用する、ということに対して効果があります。</p>
+</div>
+<div class="section" id="id3">
+<h2>明示的なリネームのデザイン<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-default" id="id17">
+<span id="prf-vs-data-in-rob"></span><img alt="PRF vs Data-in-ROB design" src="../_images/prf-and-arf.png" />
+<p class="caption"><span class="caption-number">Fig. 14 </span><span class="caption-text">物理レジスタ(左)とROB中データのデザイン(右)</span><a class="headerlink" href="#id17" title="Permalink to this image">¶</a></p>
+</div>
+<p>BOOMは、「明示的リネーム」または「物理レジスタファイル」によるアウトオブオーダーのコアデザインです。
+<strong>物理レジスタファイル</strong> は、ISAが規定するよりも多くのレジスタを含み、
+コミットされたアーキテクチャのレジスタ状態と投機的なレジスタ状態の両方を保持します。
+<strong>リネームマップテーブル</strong> には、コミットされた状態を回復するために必要な情報が含まれています。
+命令がリネームされると、そのレジスタ指定子は物理レジスタファイルにある物理レジスタを指すように明示的に更新されます。 <a class="footnote-reference brackets" href="#id12" id="id4">1</a></p>
+<p>これは、「暗黙のリネーム」や「データインROB」と呼ばれるアウトオブオーダーのコアデザインとは対照的でです。
+<strong>ARF (アーキテクチャレジスタファイル: Architectural Register File)</strong> はコミットされたレジスタの状態のみを保持し、
+ROBは投機的なライトバックデータを保持しています。
+コミット時には、ROBは投機的データを ARF[2]_ に転送します。</p>
+</div>
+<div class="section" id="id5">
+<h2>リネームマップテーブル<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-default" id="id18">
+<span id="rename-stage"></span><img alt="The Rename Stage" src="../_images/rename-pipeline.png" />
+<p class="caption"><span class="caption-number">Fig. 15 </span><span class="caption-text"><strong>リネームステージ</strong>。論理レジスタ指定子は**リネームマップテーブル**を読み込んで物理レジスタ指定子を取得します。
+スーパースカラのリネームでは、マップテーブルの変更は依存する命令にバイパスされなければなりません。
+その後、物理ソース指定子はビジーテーブルを読むことができます。
+Stale指定子は、命令が後にコミットしたときにどの物理レジスタが解放されるかを追跡するために使用されます。
+物理レジスタファイルのP0は常に0です。</span><a class="headerlink" href="#id18" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>リネームマップテーブル</strong> (マップテーブルと略す)は、ISAレジスタから物理レジスタへの投機的なマッピングを保持します。</p>
+<p>各分岐命令はリネームマップテーブルのコピーを取得します[3]。
+分岐の予測が外れた場合、リネームマップテーブルは予測が外れた分岐命令の
+リネームマップテーブルのコピーから即座にリセットすることができます。</p>
+<p>RV64G ISAでは、レジスタ指定子の位置が固定されているため (暗黙のレジスタ指定子はない)、
+命令がデコードされる前にマップテーブルを読み取ることができます。
+そのため、 <strong>デコード</strong> と <strong>リネーム</strong> のステージを組み合わせることができます。</p>
+<div class="section" id="id6">
+<h3>例外とフラッシュによるリセット<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p>オプションで追加される「コミットマップテーブル」は、コミットされたアーキテクチャ状態のリネームマップを保持します。
+この機能を有効にすると、フラッシュ時や例外発生時にパイプラインを1サイクルでリセットすることができます
+(現在のマップテーブルがコミットされたマップテーブルにリセットされます)。
+そうでない場合、パイプラインのフラッシュには、コミットポイントでリネーム状態に書き戻すためにROBを「アンワインド」するための複数サイクルが必要となり、
+1サイクルに1つのROB行が必要となります。</p>
+</div>
+</div>
+<div class="section" id="id7">
+<h2>ビジーテーブル<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p><strong>ビジーテーブル</strong> は、各物理レジスタの準備状態を追跡します。
+すべての物理オペランドの準備が整っていれば、命令の発行が可能になります。</p>
+</div>
+<div class="section" id="id8">
+<h2>フリーリスト<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<p><strong>フリーリスト</strong> は、現在使用されていない物理レジスタを追跡し、
+<em>リネーム</em> ステージを通過した命令に新しい物理レジスタを割り当てるために使用されます。</p>
+<p>フリーリストはビットベクターとして実装されます。
+優先度デコーダは、最初のフリーレジスタを見つけるために使用されます。
+BOOMでは、カスケード式の優先度デコーダを使用して、1サイクルに複数のレジスタを割り当てています。<a class="footnote-reference brackets" href="#id15" id="id9">4</a></p>
+<p>分岐命令(またはJALR)ごとに、リネームマップテーブルがスナップショットされ、
+分岐予測の誤りを1サイクルで回復できるようになっています。
+同様に、フリーリストもゼロに初期化された新しい「アロケーション・リスト」を確保します。
+新しい物理レジスタが割り当てられると、各分岐の「アロケーションリスト」が更新され、
+分岐後に割り当てられたすべての物理レジスタが追跡されます。
+誤検知が発生した場合は、そのブランチの「アロケーションリスト」と「フリーリスト」を <em>論理和</em> することで、
+「フリーリスト」に戻します。<a class="footnote-reference brackets" href="#id16" id="id10">5</a></p>
+</div>
+<div class="section" id="id11">
+<h2>古くなったリネームレジスタ<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<p>レジスタを書き込む命令では、マップテーブルが読み込まれ、 <em>古くなった物理レジスタ指定子</em> (“stale pdst”)が取得されます。
+命令がコミットされると、以降の命令では読み取れないため、 <em>stale pdst</em> はフリーリストに戻されます。</p>
+<dl class="footnote brackets">
+<dt class="label" id="id12"><span class="brackets"><a class="fn-backref" href="#id4">1</a></span></dt>
+<dd><p>MIPS R10k、Alpha 21264、Intel Sandy Bridge、ARM Cortex A15の各コアは、明示的なリネームを採用したアウトオブオーダーのコアの例です。</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id13"><span class="brackets">2</span></dt>
+<dd><p>Pentium 4 とARM Cortex A57は「暗黙的なリネーム」を採用したデザインの一例です。</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id14"><span class="brackets">3</span></dt>
+<dd><p>より広いパイプラインのための別の設計では、1サイクルあたり最大1つのスナップショットのみを作成することを好むかもしれませんが、
+これには <span class="xref std std-term">フェッチパケット</span> 内の任意の命令に対する正確なマッピングを推論するための追加の複雑さが伴います。</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id15"><span class="brackets"><a class="fn-backref" href="#id9">4</a></span></dt>
+<dd><p>2命令幅の <strong>リネームステージ</strong> では逆方向から始まる2つのプライオリティデコーダを使うことができます。</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id16"><span class="brackets"><a class="fn-backref" href="#id10">5</a></span></dt>
+<dd><p>概念的には、分岐はフリーリストを「スナップショット」していると説明されることが多いです(分岐予測ミスが発生した時点での現在のフリーリストと*ORしている)。
+しかし、スナップショットでは、スナップショット発生時に割り当てられた物理レジスタが、その後解放され、分岐予測ミスが検出される前に再割り当てされた場合を考慮することができません。
+この場合、スナップショットも現在のフリーリストもその物理レジスタが解放されたことを知らないため、物理レジスタがリークしてしまいます。
+最終的には、十分な数の物理レジスタを確保するためにプロセッサが減速し、マシンが停止してしまいます。
+これが自伝的に聞こえるのは、原作者(Chris)がコンピュータ・アーキテクチャの講義を信頼していたからかもしれませんが、まあ…。</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="reorder-buffer.html" class="btn btn-neutral float-right" title="リオーダバッファ(ROB)とディスパッチステージ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="decode-stage.html" class="btn btn-neutral float-left" title="デコードステージ" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

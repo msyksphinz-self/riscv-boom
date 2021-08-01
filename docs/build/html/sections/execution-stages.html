@@ -1,0 +1,478 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>実行パイプライン &mdash; RISCV-BOOM  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ロードストアユニット(LSU)" href="load-store-unit.html" />
+    <link rel="prev" title="レジスタファイルとバイパスネットワーク" href="reg-file-bypass-network.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> RISCV-BOOM
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom.html">The Berkeley Out-of-Order Machine (BOOM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/boom-pipeline.html">BOOMパイプライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/chisel.html">ハードウェア構築言語Chisel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/riscv-isa.html">RISC-V命令セットアーキテクチャ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro-overview/rocket-chip.html">Rocket Chip SoCジェネレータ</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Overview:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="instruction-fetch-stage.html">命令フェッチ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branch-prediction/index.html">分岐予測</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decode-stage.html">デコードステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rename-stage.html">リネームステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reorder-buffer.html">リオーダバッファ(ROB)とディスパッチステージ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue-units.html">命令発行ユニット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reg-file-bypass-network.html">レジスタファイルとバイパスネットワーク</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">実行パイプライン</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">実行ユニット</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">スケジューリングの準備</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">機能ユニット</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">パイプライン化された機能ユニット</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">非パイプラインの機能ユニット</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">分岐ユニット &amp; 分岐命令の投機実行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">ロードストアユニット</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">浮動小数点ユニット</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id13">浮動小数点除算と平方根ユニット</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id16">パラメータ化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#control-status">Control/Statusレジスタ操作命令</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="load-store-unit.html">ロードストアユニット(LSU)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory-system.html">The Memory System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="parameterization.html">Parameterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boom-ecosystem.html">The BOOM Development Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uarch-counters.html">Micro-architectural Event Tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physical-realization.html">Physical Realization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Other:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="future-work.html">Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RISCV-BOOM</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>実行パイプライン</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sections/execution-stages.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="id1">
+<h1>実行パイプライン<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="figure align-default" id="id26">
+<span id="dual-issue-pipeline"></span><img alt="Dual Issue Pipeline" src="../_images/execution-pipeline-2w.png" />
+<p class="caption"><span class="caption-number">Fig. 19 </span><span class="caption-text">2命令発行のBOOMのパイプライン例。最初の発行ポートは、ALU演算、FPU演算、整数乗算命令を受け付けることができるExecute Unit #0に、
+<span class="xref std std-term">UOP&lt;Micro-Op (UOP)`をスケジューリングします。
+2番目の発行ポートは、ALU演算、整数除算命令(非パイプライン)、ロード/ストア演算をスケジュールします。
+ALU演算は、依存する命令にバイパスすることができます。なお、実行ユニット#0のALUには、FPUやiMulユニットとのレイテンシーを合わせるためにパイプラインレジスタが追加されており、
+書き込みポートのスケジューリングが容易になっています。
+各 :term:`Execution Unit</span> は、それ専用の1つの命令発行ポートを持っていますが、
+その中にはいくつかの下位レベルの <span class="xref std std-term">機能ユニット</span> が含まれています。</span><a class="headerlink" href="#id26" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>実行パイプライン</strong> は、 <span class="xref std std-term">Micro-Ops (UOPs)</span> の実行とライトバックをカバーしています。
+<a class="reference internal" href="terminology.html#term-Micro-Op-UOP"><span class="xref std std-term">UOPs</span></a> はパイプラインを次々と通過しますが、 <a class="reference internal" href="terminology.html#term-Micro-Op-UOP"><span class="xref std std-term">UOPs</span></a> 自体は実行パイプラインに順番通りではない形で発行されている可能性があります。
+<a class="reference internal" href="#dual-issue-pipeline"><span class="std std-numref">Fig. 19</span></a> は2命令発行の BOOM の実行パイプラインの例を示しています。</p>
+<div class="section" id="id2">
+<h2>実行ユニット<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-default" id="id27">
+<span id="example-fu"></span><img alt="Example :term:`Execution Unit`" src="../_images/execution-unit.png" />
+<p class="caption"><span class="caption-number">Fig. 20 </span><span class="caption-text">例 <span class="xref std std-term">実行ユニット</span>。この例では、整数のALU(依存する命令に結果をバイパスできる)と、
+動作中にビジー状態になるパイプライン化されていない分周器を示しています。
+両方の <span class="xref std std-term">機能ユニット</span> は、1つの書き込みポートを共有しています。
+実行ユニットは、キル信号と分岐解決信号の両方を受け取り、必要に応じて内部の機能ユニットに渡します。</span><a class="headerlink" href="#id27" title="Permalink to this image">¶</a></p>
+</div>
+<p><span class="xref std std-term">実行ユニット</span> とは、1つの命令発行ポートが <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> をスケジュールするモジュールで、
+<span class="xref std std-term">機能ユニット</span> のいくつかの組み合わせを含みます。
+別の言い方をすると、 <strong>命令発行キュー</strong> からの各命令発行ポートは、1つだけの <span class="xref std std-term">実行ユニット</span> と通信します。
+1つの <a class="reference internal" href="terminology.html#term-Execution-Unit"><span class="xref std std-term">Execution Unit</span></a> は1つの単純な整数ALUだけを含むかもしれませんし、
+完全な浮動小数点ユニット、整数ALU、整数乗算ユニットを含むかもしれません。</p>
+<p><span class="xref std std-term">実行ユニット</span> の目的は、アーキテクトがパイプラインにどのような種類の <span class="xref std std-term">実行ユニット</span> を追加できるかについて、
+多くのコントロールを与える柔軟な抽象化を提供することです。</p>
+<div class="section" id="id3">
+<h3>スケジューリングの準備<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p><span class="xref std std-term">実行ユニット</span> は、利用可能な <span class="xref std std-term">機能ユニット</span> のビットベクターを命令発行スケジューラに提供します。
+命令発行スケジューラは、その <span class="xref std std-term">実行ユニット</span> がサポートする <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)`のみをスケジュールします。
+常に準備ができていない可能性のある :term:`Functional Unit</span>  (例えば、パイプライン化されていない除算器)については、
+ビットベクタの適切なビットが無効になります(参照 <a class="reference internal" href="#dual-issue-pipeline"><span class="std std-numref">Fig. 19</span></a>)。</p>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>機能ユニット<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-default" id="id28">
+<span id="abstract-fu"></span><img alt="Abstract :term:`Functional Unit`" src="../_images/abstract-functional-unit.png" />
+<p class="caption"><span class="caption-number">Fig. 21 </span><span class="caption-text">抽象的なパイプライン化された <span class="xref std std-term">機能ユニット</span> クラスです。
+専門家によって書かれた低レベルの <span class="xref std std-term">機能ユニット</span> の中でインスタンス化されます。
+<span class="xref std std-term">UOPs&lt;Micro-Op (UOP)`は、低レベルの :term:`機能ユニット</span> を出るときに、
+そのレスポンスをゲートオフすることで個別に殺されます。</span><a class="headerlink" href="#id28" title="Permalink to this image">¶</a></p>
+</div>
+<p><span class="xref std std-term">機能ユニット</span> はCPUの筋肉であり、命令に応じて必要な演算を行います。
+<span class="xref std std-term">機能ユニット</span> を正しく効率的に実装するには、知識豊富なドメインエキスパートが必要です。</p>
+<p>このような理由から、BOOMは抽象的な <span class="xref std std-term">機能ユニット</span> クラスを使用して、Rocket リポジトリから
+エキスパートが書いた低レベルの <span class="xref std std-term">機能ユニット</span> を「ラップ」しています( <span class="xref std std-ref">Rocket Chip SoC Generator</span> 参照)。
+しかし、Rocketのインオーダープロセッサ用に作成されたエキスパートが書いた <span class="xref std std-term">機能ユニット</span> は、
+インオーダーの発行ポイントとコミットポイントについて仮定しています(つまり、一旦命令がそれらにディスパッチされたら、決してキルする必要はないということです)。
+この仮定はBOOMでは崩れます。</p>
+<p>しかし、BOOM は <span class="xref std std-term">機能ユニット</span> を書き直したりフォークしたりするのではなく、抽象的な <span class="xref std std-term">機能ユニット</span> クラス( <a class="reference internal" href="#abstract-fu"><span class="std std-numref">Fig. 21</span></a> 参照)を提供しています。
+このクラスは、低レベルの機能ユニットを BOOM 内で動作させるために必要なパラメータ化された自動生成サポートコードで「ラップ」します。
+リクエストポートとレスポンスポートは抽象化されているので、 <span class="xref std std-term">機能ユニット</span> クラスは統一された交換可能なインターフェースを提供することができます。</p>
+<div class="section" id="id5">
+<h3>パイプライン化された機能ユニット<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>パイプライン化された <span class="xref std std-term">機能ユニット</span> は、1サイクルごとに新しい <span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> を受け入れることができます。
+それぞれの <span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> は、既知の固定されたレイテンシーをとります。</p>
+<p>投機実行のサポートは、専門家によって書かれた <span class="xref std std-term">機能ユニット</span> 内の <span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> メタデータと <em>分岐マスク</em> を並行して渡すパイプラインを自動的に生成することによって提供されます。
+もし <span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> が誤って指定された場合、その応答は機能ユニットを出るときに無効にされます。</p>
+<p>パイプライン化された <span class="xref std std-term">機能ユニット</span> の例を <a class="reference internal" href="#abstract-fu"><span class="std std-numref">Fig. 21</span></a> に示します。</p>
+</div>
+<div class="section" id="id6">
+<h3>非パイプラインの機能ユニット<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p>パイプライン化されていない <span class="xref std std-term">機能ユニット</span> (例：除算器)は、1つの操作を完了するために可変の(そして未知の)サイクル数を要します。
+一旦占有されると、レディ信号のアサートが解除され、追加の <span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> がスケジューリングされることはありません。</p>
+<p>投機実行のサポートは、 <span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> の <strong>ブランチマスク</strong> を <span class="xref std std-term">機能ユニット</span> でトラッキングすることで行われます。</p>
+<p>専門家によって書かれたパイプライン化されていない <span class="xref std std-term">機能ユニット</span> の唯一の要件は、
+誤って仕様化された <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> を素早く取り除くための <em>kill</em> シグナルを提供することです。<a class="footnote-reference brackets" href="#id19" id="id7">1</a></p>
+<div class="figure align-default" id="id29">
+<span id="fu-hierarchy"></span><img alt="Functional Unit Hierarchy" src="../_images/functional-unit-hierarchy.png" />
+<p class="caption"><span class="caption-number">Fig. 22 </span><span class="caption-text">破線の楕円は専門家によって書かれた低レベルの <span class="xref std std-term">機能ユニット</span> であり、四角は低レベルの <span class="xref std std-term">機能ユニット</span> をインスタンス化する具象クラスであり、
+八角は汎用的な投機のサポートと BOOM パイプラインとのインターフェイスを提供する抽象クラスです。
+浮動小数点の除算と平方根のユニットは <code class="docutils literal notranslate"><span class="pre">Pipelined</span></code> と <code class="docutils literal notranslate"><span class="pre">Unpipelined</span></code> のどちらの抽象クラスにも
+きれいに収まらないので、<code class="docutils literal notranslate"><span class="pre">FunctionalUnit</span></code> のスーパークラスを直接継承しています。</span><a class="headerlink" href="#id29" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="id8">
+<h2>分岐ユニット &amp; 分岐命令の投機実行<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<p><span class="xref std std-term">分岐ユニット</span> は、すべての分岐命令とジャンプ命令の解決を行います。</p>
+<p>パイプラインの中で “インフライト “である(割り当てられたROBエントリを持つ)すべての <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> には分岐マスクが与えられます。
+分岐マスクの各ビットは、 <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> が予測されるされる未実行のインフライト分岐に対応しています。
+<em>デコード</em> の各分岐命令には分岐タグが割り当てられ、それに続くすべての <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> には分岐マスクの対応するビットが設定されます
+( <a class="reference internal" href="terminology.html#term-Branch-Unit"><span class="xref std std-term">Branch Unit</span></a> でブランチが解決されるまで)。</p>
+<p>分岐(またはジャンプ)が <span class="xref std std-term">フロントエンド</span> によって正しく推測された場合、 <span class="xref std std-term">分岐ユニット</span> の唯一のアクションは、
+ブランチが正しく解決されたことを <em>全ての</em> インフライトの <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> に対応する分岐タグをブロードキャストすることです。
+各 <span class="xref std std-term">UOP&lt;Micro-Op (UOP)</span> は、その分岐マスクの対応するビットをクリアすることができ、
+その分岐タグは、その後、<em>Decode</em> ステージで新しいブランチに割り当てることができます。</p>
+<p>もし分岐(またはジャンプ)の予測が間違っていた場合、 <span class="xref std std-term">分岐ユニット</span> は PC を正しいターゲットにリダイレクトし、
+<span class="xref std std-term">フロントエンド</span> と <span class="xref std std-term">フェッチバッファ</span> を殺し、
+依存しているすべての機内の <span class="xref std std-term">UOPs&lt;Micro-Op (UOP)</span> を殺すことができるように、予測が間違っている分岐タグをブロードキャストしなければなりません。
+PCリダイレクト信号は、分岐予測ミスのペナルティを減らすために、すぐに出力されます。
+しかし、<em>kill</em> 信号はクリティカルパス上の理由から1サイクル遅れます。</p>
+<p><span class="xref std std-term">フロントエンド</span> は、正しい方向を予測と一致させるために、
+適切な分岐推測のメタデータをパイプラインに渡さなければなりません。
+ジャンプレジスタ命令は、正しいターゲットとROB内の次の命令のPCを比較して評価されます(利用できない場合は、分岐予測ミスが想定されます)。
+ジャンプは <span class="xref std std-term">フロントエンド</span> で評価され、処理されます(命令がデコードできるようになると、その方向とターゲットの両方が判明するため)。</p>
+<p>BOOMは（現在のところ）1つの <span class="xref std std-term">分岐ユニット</span> を持つことのみをサポートしています。</p>
+</div>
+<div class="section" id="id9">
+<h2>ロードストアユニット<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<p><strong>ロード/ストアユニット(LSU)</strong> は、ロード、ストア、アトミック、フェンスの各オペレーションの実行を担当します。</p>
+<p>BOOMは(現在)、1つのLSUを持つことしかサポートしていません(したがって、1サイクルあたり1つのロードまたはストアをメモリに送ることしかできません)。<a class="footnote-reference brackets" href="#id20" id="id10">2</a></p>
+<p>LSUの詳細については <span class="xref std std-ref">The Load/Store Unit (LSU)</span> を参照してください。</p>
+</div>
+<div class="section" id="id11">
+<h2>浮動小数点ユニット<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-center" id="id30">
+<span id="fp-fu"></span><a class="reference internal image-reference" href="../_images/functional-unit-fpu.png"><img alt="Functional Unit for FPU" src="../_images/functional-unit-fpu.png" style="width: 315.0px; height: 504.0px;" /></a>
+<p class="caption"><span class="caption-number">Fig. 23 </span><span class="caption-text">FPUのクラス階層を示します。専門家によって書かれたコードは、hardfloatとrocketのリポジトリに含まれています。
+“FPU”クラスはRocketコンポーネントをインスタンス化し、
+それ自体はさらに抽象的な <span class="xref std std-term">機能ユニット</span> クラスによってラップされています(これはアウトオブオーダーの投機サポートを提供します)。</span><a class="headerlink" href="#id30" title="Permalink to this image">¶</a></p>
+</div>
+<p>BOOM で使用される低レベルの浮動小数点ユニットは、Rocket プロセッサ (<a class="reference external" href="https://github.com/chipsalliance/rocket-chip">https://github.com/chipsalliance/rocket-chip</a>) と
+hardfloat (<a class="reference external" href="https://github.com/ucb-bar/berkeley-hardfloat">https://github.com/ucb-bar/berkeley-hardfloat</a>) のリポジトリから取得しています。
+図 <a class="reference internal" href="#fp-fu"><span class="std std-numref">Fig. 23</span></a> は、FPU のクラス階層を示しています。</p>
+<p>書き込みポートのスケジューリングが容易になるように、パイプライン化されたFPユニットはすべて同じレイテンシになるようにパディングされています。<a class="footnote-reference brackets" href="#id21" id="id12">3</a></p>
+</div>
+<div class="section" id="id13">
+<h2>浮動小数点除算と平方根ユニット<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
+<p>BOOM は、単一の <strong>FDiv/Sqrt</strong> (略して fdiv) を用いた浮動小数点の除算と平方根演算を完全にサポートしています。
+BOOM は hardfloat リポジトリから倍精度ユニットをインスタンス化することでこれを実現しています。
+このユニットには以下のような機能・制約があります。</p>
+<ul class="simple">
+<li><p>65ビットの再コード化された倍精度入力を期待する</p></li>
+<li><p>65ビットに再コード化された倍精度の出力を提供する</p></li>
+<li><p>除算と平方根の演算を同時に実行可能</p></li>
+<li><p>演算はパイプライン化されておらず、未知の可変レイテンシーを要する</p></li>
+<li><p><em>不安定</em> なFIFOインターフェース</p></li>
+</ul>
+<p>単精度演算は、オペランドが倍精度にアップスケールされ、出力はダウンスケールされます。<a class="footnote-reference brackets" href="#id22" id="id14">4</a></p>
+<p>このユニットは非パイプラインですが、他の <span class="xref std std-term">機能ユニット</span> で使用されている Pipelined/Unpipelined の抽象化にはきれいに収まりません
+( <a class="reference internal" href="#fu-hierarchy"><span class="std std-numref">Fig. 22</span></a> 参照)。
+これは、このユニットが不安定なFIFOインターフェースを提供しているからです。
+ユニットはサイクル``i``で <em>ready</em> 信号を提供しているかもしれませんが、たとえ操作がキューに入っていなくても、
+サイクル <code class="docutils literal notranslate"><span class="pre">i+1</span></code> で <em>ready</em> であり続けるという保証はありません。
+これは、命令発行キューが命令を発行しようとしても、
+後のサイクルでユニットに届いたときにユニットがそれを受け入れるかどうか確信が持てないため、難しい問題となります。</p>
+<p>解決策としては、ユニット内に追加のバッファリングを追加して、命令がユニットに直接リリースされるまでの間、
+命令を保持することです。ユニットのバッファリングが一杯になったら、
+バックプレッシャーをかけて <strong>命令発行キュー</strong> に安全にアクセスできます。<a class="footnote-reference brackets" href="#id23" id="id15">5</a></p>
+</div>
+<div class="section" id="id16">
+<h2>パラメータ化<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h2>
+<p>BOOMは命令発行の幅や実行パイプラインの中の <span class="xref std std-term">機能ユニット</span> の組み合わせを柔軟に指定することができます。
+BOOMの実行パイプラインをどのようにインスタンス化するかについての詳細な見解は、 <code class="docutils literal notranslate"><span class="pre">src/main/scala/exu/execution-units.scala</span></code> を参照してください。</p>
+<p>FPユニットのレイテンシーなどに関する追加のパラメータ設定は、コンフィギュレーション設定(<code class="docutils literal notranslate"><span class="pre">src/main/common/config-mixins.scala</span></code>)の中にあります。</p>
+</div>
+<div class="section" id="control-status">
+<h2>Control/Statusレジスタ操作命令<a class="headerlink" href="#control-status" title="Permalink to this headline">¶</a></h2>
+<p><strong>CSR(Control/Status Register)</strong> 命令群により、コントロール/ステータス・レジスタのアトミックな読み出し/書き込みが可能になりました。
+これらのアーキテクチャ・レジスタは、整数レジスタやフローティング・レジスタとは別に、サイクル・カウント、リタイア命令カウント、ステータス、例外PC、例外ベクタ・レジスタ(その他多数)を含んでいます。
+各CSRには、読み書きに必要な特権レベルがあり、読み書き時に独自の副作用が発生するものもあります。</p>
+<p>BOOMは(現在)CSRの名前を変更しません。
+また、CSRの読み書きによって生じる潜在的な副作用に加えて、<strong>BOOMはCSR命令を非特定的にしか実行しません</strong> <a class="footnote-reference brackets" href="#id24" id="id17">6</a>
+これは、CSR命令を「ユニーク」(または「シリアライズ」)な命令としてマークすることで実現します。
+その後、命令発行キューで発行され、物理レジスタ・ファイルから適切なオペランドを読み込み、CSRファイルに送られます。<a class="footnote-reference brackets" href="#id25" id="id18">7</a>
+CSR命令はCSRFileで実行され、必要に応じて物理レジスタファイルにデータを書き戻します。
+CSRFileは、CSR命令（例：syscall）の実行の一部として、PCリダイレクトや例外を発することもあります。</p>
+<p><strong>RoCCインタフェース</strong> は，コントロール・プロセッサのスカラ・レジスタ・ファイルから、RoCCコマンドと最大2つのレジスタ入力を受け付ける。
+RoCCコマンドは、コントロール・プロセッサによってフェッチされたRISC-V命令全体(“RoCC命令”)となります。
+したがって，各RoCCキューのエントリは，最低でも <code class="docutils literal notranslate"><span class="pre">2\*XPRLEN</span> <span class="pre">+</span> <span class="pre">32</span></code> ビットのサイズになります
+(追加のRoCC命令は，より長い命令フォーマットを使用して追加の動作をエンコードすることができます)。</p>
+<p>BOOMはROBに命令ビットを格納しないので、別のデータ構造(A “RoCC Shim”)は、
+RoCC命令がコミットされ、RoCCコマンドがコプロセッサに送信されるまで、命令を保持します。</p>
+<p>また、ソース・オペランドは、BOOMのレジスタ・ファイルにアクセスする必要がある。
+RoCC命令はイシューウィンドウにディスパッチされ、オペランドが利用可能になった時点でレジスタファイルのリードポートにアクセスできるようにスケジューリングされます。
+その後、オペランドはRoCC Shimに書き込まれ、コプロセッサに送信されるまでオペランドと命令ビットが保存されます。
+これには重要な状態が必要です。</p>
+<p>RoCCへの発行後、飛行中のRoCC命令のキューを追跡します。
+これは、RoCCレスポンスからの論理的なデスティネーション・レジスタ識別子を、
+以前に名前を変更した物理的なデスティネーション・レジスタ識別子に変換する必要があるためです。</p>
+<p>現在、RoCCインターフェイスは、割り込み、例外処理、BOOM FPUの再利用、L1データキャッシュへの直接アクセスなどをサポートしていません。
+これらはすべて簡単に追加できるはずで、需要があれば完成させる予定です。</p>
+<dl class="footnote brackets">
+<dt class="label" id="id19"><span class="brackets"><a class="fn-backref" href="#id7">1</a></span></dt>
+<dd><p>This constraint could be relaxed by waiting for the un-pipelined unit
+to finish before de-asserting its busy signal and suppressing the
+<em>valid</em> output signal.</p>
+</dd>
+<dt class="label" id="id20"><span class="brackets"><a class="fn-backref" href="#id10">2</a></span></dt>
+<dd><p>Relaxing this constraint could be achieved by allowing multiple LSUs
+to talk to their own bank(s) of the data-cache, but the added
+complexity comes in allocating entries in the LSU before knowing the
+address, and thus which bank, a particular memory operation pertains
+to.</p>
+</dd>
+<dt class="label" id="id21"><span class="brackets"><a class="fn-backref" href="#id12">3</a></span></dt>
+<dd><p>Rocket instead handles write-port scheduling by killing and
+refetching the offending instruction (and all instructions behind it)
+if there is a write-port hazard detected. This would be far more
+heavy-handed to do in BOOM.</p>
+</dd>
+<dt class="label" id="id22"><span class="brackets"><a class="fn-backref" href="#id14">4</a></span></dt>
+<dd><p>It is cheaper to perform the SP-DP conversions than it is to
+instantiate a single-precision fdivSqrt unit.</p>
+</dd>
+<dt class="label" id="id23"><span class="brackets"><a class="fn-backref" href="#id15">5</a></span></dt>
+<dd><p>It is this ability to hold multiple inflight instructions within the
+unit simultaneously that breaks the “only one instruction at a time”
+assumption required by the UnpipelinedFunctionalUnit abstract class.</p>
+</dd>
+<dt class="label" id="id24"><span class="brackets"><a class="fn-backref" href="#id17">6</a></span></dt>
+<dd><p>There is a lot of room to play with regarding the CSRs. For example,
+it is probably a good idea to rename the register (dedicated for use
+by the supervisor) as it may see a lot of use in some kernel code and
+it causes no side-effects.</p>
+</dd>
+<dt class="label" id="id25"><span class="brackets"><a class="fn-backref" href="#id18">7</a></span></dt>
+<dd><p>The CSRFile is a Rocket component.</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="load-store-unit.html" class="btn btn-neutral float-right" title="ロードストアユニット(LSU)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="reg-file-bypass-network.html" class="btn btn-neutral float-left" title="レジスタファイルとバイパスネットワーク" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, The Regents of the University of California
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
